@@ -1,0 +1,158 @@
+/* ==========================================================================
+    VARIÁVEIS GLOBAIS - TEMA CATPPUCCIN (MOCHA)
+   ========================================================================== */
+:root {
+    --ctp-base: #1e1e2e;      /* Fundo principal da aplicação (Base) */
+    --ctp-mantle: #181825;    /* Fundo secundário / Navbar (Mantle) */
+    --ctp-crust: #11111b;     /* Bordas e sombras profundas (Crust) */
+    --ctp-text: #cdd6f4;      /* Texto principal (Text) */
+    --ctp-subtext: #a6adc8;   /* Texto secundário (Subtext0) */
+    --ctp-sapphire: #74c7ec;  /* Cor de destaque / Active (Sapphire) */
+    --ctp-lavender: #b4befe;  /* Cor da marca / Logo (Lavender) */
+    --ctp-overlay: #313244;   /* Bordas sutis (Surface0) */
+}
+
+/* ==========================================================================
+    CONFIGURAÇÕES GERAIS DA PÁGINA
+   ========================================================================== */
+body {
+    background-color: var(--ctp-base);
+    color: var(--ctp-text);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+/* ==========================================================================
+    CUSTOMIZAÇÃO DA NAVBAR (BOOTSTRAP 5.3)
+   ========================================================================== */
+.custom-navbar {
+    /* Mapeamento para as variáveis do Catppuccin */
+    --bs-navbar-bg: var(--ctp-mantle);
+    --bs-navbar-color: var(--ctp-subtext);
+    --bs-navbar-hover-color: var(--ctp-text);
+    --bs-navbar-active-color: var(--ctp-sapphire);
+    --bs-navbar-brand-color: var(--ctp-lavender);
+    --bs-navbar-brand-hover-color: var(--ctp-sapphire);
+    
+    /* Botão Toggler (Mobile) adaptado ao tom do Catppuccin */
+    --bs-navbar-toggler-border-color: var(--ctp-overlay);
+    --bs-navbar-toggler-icon-bg: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28205, 214, 244, 0.8%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+
+    box-shadow: 0 4px 12px rgba(17, 17, 27, 0.5);
+    border-bottom: 1px solid var(--ctp-overlay);
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+}
+
+/* Destaque na marca (Logo "Agendei") */
+.custom-navbar .navbar-brand {
+    font-weight: 700;
+    font-size: 1.35rem;
+    letter-spacing: -0.5px;
+    transition: color 0.2s ease;
+}
+
+/* Indicador visual no link ativo */
+.custom-navbar .nav-link {
+    font-weight: 500;
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+    transition: color 0.2s ease;
+}
+
+.custom-navbar .nav-link.active {
+    font-weight: 600;
+    border-bottom: 2px solid var(--ctp-sapphire);
+}
+
+/* Ajuste do menu responsivo no mobile */
+@media (max-width: 991.98px) {
+    .custom-navbar .navbar-nav {
+        padding-top: 1rem;
+    }
+    
+    .custom-navbar .nav-link.active {
+        border-bottom: none;
+        border-left: 3px solid var(--ctp-sapphire);
+        padding-left: 0.75rem !important;
+    }
+}
+
+/* ==========================================================================
+   CUSTOMIZAÇÃO DO CONTEUDO PRINCIPAL 
+   ========================================================================== */
+
+/* 2. Gerencia a expansão e centralização do conteúdo principal */
+.main-content {
+    flex: 1 0 auto;             /* Expande para ocupar o espaço entre header e footer */
+    display: flex;
+    flex-direction: column;
+    align-items: center;        /* Centraliza o conteúdo na horizontal */
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+}
+
+
+/* -------------- Apology -------------- */
+.apology-icon {
+    max-width: 300px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.apology-icon svg {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.apology-icon svg path,
+.apology-icon svg polygon,
+.apology-icon svg circle,
+.apology-icon svg rect {
+    fill: #b4befe;
+}
+
+/* ==========================================================================
+   CUSTOMIZAÇÃO DO FORMULÁRIO DE LOGIN E REGISTRO
+   ========================================================================== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.6rem 1.2rem;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 500;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+/* Estilo Primário - Catppuccin Mocha (Blue) */
+.btn-primary {
+  background-color: #89b4fa; 
+  color: #1e1e2e;          
+}
+
+.btn-primary:hover {
+  background-color: #74c7ec; 
+}
+
+.btn-primary:active {
+  transform: scale(0.98);
+}
+
+
+
+/* ==========================================================================
+   CUSTOMIZAÇÃO DO FOOTER
+   ========================================================================== */
+
+.custom-footer {
+    background-color: var(--ctp-mantle);
+    color: var(--ctp-subtext);
+    border-top: 1px solid var(--ctp-overlay);
+}

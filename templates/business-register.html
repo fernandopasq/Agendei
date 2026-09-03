@@ -1,0 +1,49 @@
+{% extends "layout.html" %}
+
+{% block title %}
+Registrar-se Parceiros
+{% endblock %}
+
+{% block body %}
+<h1 class="text-center mb-4">Registrar-se Parceiros</h1>
+
+<form action="/business/register" method="post" class="mx-auto w-auto">
+
+    <!-- Group: Personal data -->
+    <fieldset class="mb-4">
+        <legend class="fw-semibold mb-3">Dados Pessoais</legend>
+
+        <div class="mb-3">
+            <label for="name" class="form-label">Nome*</label>
+            <input autocomplete="off" autofocus class="form-control" id="name" name="name" placeholder="Nome" type="text">
+        </div>
+
+        <div class="mb-3">
+            <label for="surename" class="form-label">Sobrenome*</label>
+            <input autocomplete="off" class="form-control" id="surename" name="surename" placeholder="Sobrenome" type="text">
+        </div>
+    </fieldset>
+
+    <!-- Group: Register info -->
+    <fieldset>
+        <legend class="fw-semibold mb-3">Cadastro de Usuário</legend>
+
+        <div class="mb-3">
+            <label for="username" class="form-label">Nome de Usuário*</label>
+            <input autocomplete="off" class="form-control" id="username" name="username" placeholder="Nome de Usuário" type="text">
+        </div>
+
+        <div class="mb-3">
+            <label for="password" class="form-label">Senha*</label>
+            <input class="form-control" id="password" name="password" placeholder="Senha" type="password">
+        </div>
+
+        <div class="mb-3">
+            <label for="confirmation" class="form-label">Repita a Senha*</label>
+            <input class="form-control" id="confirmation" name="confirmation" placeholder="Repita a Senha" type="password">
+        </div>
+    </fieldset>
+
+    <button class="btn btn-primary mt-3" type="submit">Registrar</button>
+</form>
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends "layout.html" %}
+
+{% block title %}
+Apology
+{% endblock %}
+
+{% block body %}
+
+<div class="text-center">
+    <h2 class="mb-3">{{ code }}</h2>
+    <h2 class="mb-3">{{ message }}</h2>
+
+<div class="apology-icon mt-3">
+    {% include "svg/apology.svg" %}
+</div>
+
+</div>
+{% endblock %}
