@@ -2,7 +2,7 @@ import sqlite3
 from flask import Blueprint, flash, redirect, render_template, request, session
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from helpers import apology, get_db
+from helpers import apology, get_db, login_required
 
 # Definindo o Blueprint
 client_bp = Blueprint("client", __name__)

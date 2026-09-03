@@ -1,3 +1,0 @@
-Usos de IA no projeto:
-
-	-> Assistência para elaborar helper de separação de user_type, similar ao de sessão, a página obriga o usuário a estar logado e possuir determinado tipo de cadastro para acessar. 
