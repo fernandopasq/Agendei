@@ -6,7 +6,6 @@ venv/
 .venv/
 env/
 
-*.db
 flask_session/
 
 .env
