@@ -43,4 +43,18 @@ Apology
 ```
 
 ## CSS
-O estilo visual do site é construido com **Bootstrap**, com padrão de cores baseados no tema **catppuccin** do VScode.
+Os elementos visuais do site são construidos com **Bootstrap**, com padrão de cores baseados no tema **catppuccin** do VScode.
+
+## Implementação do registro de localização
+
+Para registro dos estabelecimentos, utilizei o registro direto dos dados de localização de endereço
+ao invés de implementar com uma API paga e ou online de coordenadas e geocoding, afim de evitar o uso de 
+API Keys, tokens e exposição de dados sensíveis no repositorio. Deixando o funcionamento da aplicação mais simples e direta,
+sem a necessidade de containerização.
+
+Além disso a lógica de busca e exposição dos estabelecimentos ficou inteiramente por filtros de Sqlite3, tornando
+a aplicação mais enxuta.
+
+Para o registro dos logradouros e do CEP, passei os dados por uma normalização, para evitar entrada de caracteres,
+e abreviações, evitando duplicidade de endereços. A função de normalização de logradouro encontra-se em helpers.py
+

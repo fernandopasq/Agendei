@@ -2,7 +2,7 @@ import sqlite3
 from flask import Blueprint, redirect, render_template, request, session
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from helpers import apology, get_db
+from helpers import apology, get_db, normalize_street
 
 # Definindo o Blueprint com prefixo de URL automático
 business_bp = Blueprint("business", __name__, url_prefix="/business")
@@ -123,3 +123,70 @@ def register_business():
         return redirect("/business/home")
     else:
         return render_template("business-register.html")
+
+# Cadastro de Estabelecimento (Acessado via /business/addbusiness)
+@business_bp.route("/addbusiness", methods=["GET", "POST"])
+def add_store():
+    if request.method == "POST":
+        # Coletando dados do formulário
+        business_name = request.form.get("business_name")
+        description = request.form.get("description")
+        category = request.form.get("category")
+        
+        # Dados de Endereço desmembrados
+        cep = request.form.get("cep")
+        street = request.form.get("street")
+        number = request.form.get("number")
+        complement = request.form.get("complement")
+        neighborhood = request.form.get("neighborhood")
+        city = request.form.get("city")
+        state = request.form.get("state")
+
+        # Limpando/Normalizando o logradouro (Avenida, Rua, etc)
+        street = normalize_street(street)
+        # Limpando/Normalizando o CEP
+        cep = cep.replace("-", "").strip() if cep else None
+
+        # Validando campos obrigatórios definidos como NOT NULL no banco
+        if not business_name or not street or not number or not neighborhood or not city or not state:
+            return apology("Preencha todos os campos obrigatórios do endereço.", 400)
+
+        # Inserindo dados na tabela 'business'
+        conn = get_db()
+        cursor = conn.cursor()
+        cursor.execute(
+            """
+            INSERT INTO business (
+                owner_id, 
+                business_name, 
+                description, 
+                category,
+                cep, 
+                street, 
+                number, 
+                complement, 
+                neighborhood, 
+                city, 
+                state
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                session["user_id"],
+                business_name,
+                description,
+                category,
+                cep,
+                street,
+                number,
+                complement,
+                neighborhood,
+                city,
+                state
+            )
+        )
+        conn.commit()
+        conn.close()
+
+        return redirect("/business/home")
+    else:
+        return render_template("business-addbusiness.html")

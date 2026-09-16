@@ -2,40 +2,116 @@
     VARIÁVEIS GLOBAIS - TEMA CATPPUCCIN (MOCHA)
    ========================================================================== */
 :root {
-    --ctp-base: #1e1e2e;      /* Fundo principal da aplicação (Base) */
-    --ctp-mantle: #181825;    /* Fundo secundário / Navbar (Mantle) */
+    /* Paleta de Cores do Catppuccin Mocha */
+    --ctp-base: #1e1e2e;      /* Fundo principal (Base) */
+    --ctp-mantle: #181825;    /* Fundo secundário / Navbar / Footer (Mantle) */
     --ctp-crust: #11111b;     /* Bordas e sombras profundas (Crust) */
     --ctp-text: #cdd6f4;      /* Texto principal (Text) */
     --ctp-subtext: #a6adc8;   /* Texto secundário (Subtext0) */
-    --ctp-sapphire: #74c7ec;  /* Cor de destaque / Active (Sapphire) */
-    --ctp-lavender: #b4befe;  /* Cor da marca / Logo (Lavender) */
+    --ctp-sapphire: #74c7ec;  /* Destaque / Active (Sapphire) */
+    --ctp-lavender: #b4befe;  /* Marca / Logo (Lavender) */
     --ctp-overlay: #313244;   /* Bordas sutis (Surface0) */
+    --ctp-blue: #89b4fa;      /* Cor de ação / Botão (Blue) */
+
+    /* Map do Bootstrap 5.3 -> Catppuccin */
+    --bs-body-bg: var(--ctp-base);
+    --bs-body-color: var(--ctp-text);
+    --bs-secondary-color: var(--ctp-subtext);
+    --bs-border-color: var(--ctp-overlay);
+    --bs-primary: var(--ctp-blue);
+    --bs-primary-hover-bg: var(--ctp-sapphire);
+
+    /* Customização dos Inputs nativos do Bootstrap */
+    --bs-body-bg-rgb: 30, 30, 46;
+    --bs-link-color: var(--ctp-blue);
+    --bs-link-hover-color: var(--ctp-sapphire);
 }
 
 /* ==========================================================================
     CONFIGURAÇÕES GERAIS DA PÁGINA
    ========================================================================== */
 body {
-    background-color: var(--ctp-base);
-    color: var(--ctp-text);
     font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
 }
+
 /* ==========================================================================
-    CUSTOMIZAÇÃO DA NAVBAR (BOOTSTRAP 5.3)
+   CONTEÚDO PRINCIPAL (CORRIGIDO)
+   ========================================================================== */
+.main-content {
+    flex: 1 0 auto;
+    width: 100%;             /* Garante que o container interno ocupe a largura total */
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+    /* align-items: center removido para não 'encolher' nem descentralizar os filhos */
+}
+
+/* ==========================================================================
+    ESTILIZAÇÃO DE CARDS, INPUTS E FORMULÁRIOS
+   ========================================================================== */
+.card {
+    --bs-card-bg: var(--ctp-mantle);
+    --bs-card-color: var(--ctp-text);
+    --bs-card-border-color: var(--ctp-overlay);
+    --bs-card-cap-bg: var(--ctp-crust);
+}
+
+.list-group {
+    --bs-list-group-bg: transparent;
+    --bs-list-group-color: var(--ctp-text);
+    --bs-list-group-border-color: var(--ctp-overlay);
+}
+
+/* Estilo para formulários e inputs do Bootstrap */
+.form-control {
+    background-color: var(--ctp-mantle);
+    border-color: var(--ctp-overlay);
+    color: var(--ctp-text);
+}
+
+.form-control:focus {
+    background-color: var(--ctp-mantle);
+    border-color: var(--ctp-sapphire);
+    color: var(--ctp-text);
+    box-shadow: 0 0 0 0.25rem rgba(116, 199, 236, 0.25);
+}
+
+.form-control::placeholder {
+    color: var(--ctp-subtext);
+}
+
+/* ==========================================================================
+    BOTÕES E INTERAÇÕES
+   ========================================================================== */
+.btn-primary {
+    --bs-btn-bg: var(--ctp-blue);
+    --bs-btn-border-color: var(--ctp-blue);
+    --bs-btn-color: var(--ctp-base);
+    --bs-btn-hover-bg: var(--ctp-sapphire);
+    --bs-btn-hover-border-color: var(--ctp-sapphire);
+    --bs-btn-hover-color: var(--ctp-base);
+    --bs-btn-active-bg: var(--ctp-sapphire);
+    --bs-btn-active-border-color: var(--ctp-sapphire);
+    --bs-btn-active-color: var(--ctp-base);
+    font-weight: 500;
+}
+
+.btn:active {
+    transform: scale(0.98);
+}
+
+/* ==========================================================================
+    NAVBAR
    ========================================================================== */
 .custom-navbar {
-    /* Mapeamento para as variáveis do Catppuccin */
     --bs-navbar-bg: var(--ctp-mantle);
     --bs-navbar-color: var(--ctp-subtext);
     --bs-navbar-hover-color: var(--ctp-text);
     --bs-navbar-active-color: var(--ctp-sapphire);
     --bs-navbar-brand-color: var(--ctp-lavender);
     --bs-navbar-brand-hover-color: var(--ctp-sapphire);
-    
-    /* Botão Toggler (Mobile) adaptado ao tom do Catppuccin */
     --bs-navbar-toggler-border-color: var(--ctp-overlay);
     --bs-navbar-toggler-icon-bg: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28205, 214, 244, 0.8%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
 
@@ -45,7 +121,6 @@ body {
     padding-bottom: 0.75rem;
 }
 
-/* Destaque na marca (Logo "Agendei") */
 .custom-navbar .navbar-brand {
     font-weight: 700;
     font-size: 1.35rem;
@@ -53,7 +128,6 @@ body {
     transition: color 0.2s ease;
 }
 
-/* Indicador visual no link ativo */
 .custom-navbar .nav-link {
     font-weight: 500;
     padding-left: 1rem !important;
@@ -66,7 +140,6 @@ body {
     border-bottom: 2px solid var(--ctp-sapphire);
 }
 
-/* Ajuste do menu responsivo no mobile */
 @media (max-width: 991.98px) {
     .custom-navbar .navbar-nav {
         padding-top: 1rem;
@@ -80,21 +153,8 @@ body {
 }
 
 /* ==========================================================================
-   CUSTOMIZAÇÃO DO CONTEUDO PRINCIPAL 
+   UTILITÁRIOS E FOOTER
    ========================================================================== */
-
-/* 2. Gerencia a expansão e centralização do conteúdo principal */
-.main-content {
-    flex: 1 0 auto;             /* Expande para ocupar o espaço entre header e footer */
-    display: flex;
-    flex-direction: column;
-    align-items: center;        /* Centraliza o conteúdo na horizontal */
-    padding-top: 2rem;
-    padding-bottom: 2rem;
-}
-
-
-/* -------------- Apology -------------- */
 .apology-icon {
     max-width: 300px;
     margin-left: auto;
@@ -111,45 +171,8 @@ body {
 .apology-icon svg polygon,
 .apology-icon svg circle,
 .apology-icon svg rect {
-    fill: #b4befe;
+    fill: var(--ctp-lavender);
 }
-
-/* ==========================================================================
-   CUSTOMIZAÇÃO DO FORMULÁRIO DE LOGIN E REGISTRO
-   ========================================================================== */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.6rem 1.2rem;
-  font-family: inherit;
-  font-size: 0.95rem;
-  font-weight: 500;
-  border-radius: 8px;
-  border: none;
-  cursor: pointer;
-  transition: background-color 0.2s ease, transform 0.1s ease;
-}
-
-/* Estilo Primário - Catppuccin Mocha (Blue) */
-.btn-primary {
-  background-color: #89b4fa; 
-  color: #1e1e2e;          
-}
-
-.btn-primary:hover {
-  background-color: #74c7ec; 
-}
-
-.btn-primary:active {
-  transform: scale(0.98);
-}
-
-
-
-/* ==========================================================================
-   CUSTOMIZAÇÃO DO FOOTER
-   ========================================================================== */
 
 .custom-footer {
     background-color: var(--ctp-mantle);

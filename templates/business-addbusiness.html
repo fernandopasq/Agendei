@@ -1,0 +1,136 @@
+{% extends "layout.html" %}
+
+{% block title %}
+Cadastro de Estabelecimento
+{% endblock %}
+
+{% block body %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6">
+
+            <h1 class="mb-4 text-center">Cadastro de Estabelecimento</h1>
+
+            <form action="/business/addbusiness" method="post">
+
+                <!-- Grupo: Informações Gerais -->
+                <fieldset class="mb-4">
+                    <legend class="fw-semibold mb-3">Informações do Estabelecimento</legend>
+
+                    <div class="mb-3">
+                        <label for="business_name" class="form-label">Nome do Estabelecimento*</label>
+                        <input autocomplete="off" autofocus class="form-control" id="business_name" name="business_name"
+                            placeholder="Ex: Estalagem do Pônei Saltitante" type="text" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Descrição do Estabelecimento</label>
+                        <textarea class="form-control" id="description" name="description"
+                            placeholder="Ex: A melhor cerveja de Bree, quartos aconchegantes e estabulos para pôneis"
+                            rows="3"></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="category" class="form-label">Categoria do Estabelecimento*</label>
+                        <select class="form-select" id="category" name="category" required>
+                            <option value="" disabled selected>Selecione uma categoria</option>
+                            <option value="Beleza e Estética">Beleza e Estética</option>
+                            <option value="Saúde e Bem-Estar">Saúde e Bem-Estar</option>
+                            <option value="Esportes e Fitness">Esportes e Fitness</option>
+                            <option value="Serviços Automotivos">Serviços Automotivos</option>
+                            <option value="Pets">Pets</option>
+                            <option value="Educação e Consultoria">Educação e Consultoria</option>
+                            <option value="Eventos e Fotografia">Eventos e Fotografia</option>
+                            <option value="Serviços Domésticos">Serviços Domésticos</option>
+                            <option value="Outros">Outros</option>
+                        </select>
+                    </div>
+                </fieldset>
+
+                <!-- Grupo: Endereço -->
+                <fieldset class="mb-4">
+                    <legend class="fw-semibold mb-3">Endereço e Localização</legend>
+
+                    <div class="mb-3">
+                        <label for="cep" class="form-label">CEP</label>
+                        <input autocomplete="off" class="form-control" id="cep" name="cep" placeholder="Ex: 00300-001"
+                            type="text" pattern="[0-9]{5}-?[0-9]{3}">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="street" class="form-label">Logradouro (Rua / Avenida)*</label>
+                        <input autocomplete="off" class="form-control" id="street" name="street"
+                            placeholder="Ex: Estrada Leste Velha" type="text" required>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="number" class="form-label">Número*</label>
+                            <input autocomplete="off" class="form-control" id="number" name="number"
+                                placeholder="Ex: 1 ou S/N" type="text" required>
+                        </div>
+
+                        <div class="col-md-8 mb-3">
+                            <label for="complement" class="form-label">Complemento</label>
+                            <input autocomplete="off" class="form-control" id="complement" name="complement"
+                                placeholder="Ex: Próximo ao Portão Oeste" type="text">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="neighborhood" class="form-label">Bairro*</label>
+                        <input autocomplete="off" class="form-control" id="neighborhood" name="neighborhood"
+                            placeholder="Ex: Vila de Bree" type="text" required>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-8 mb-3">
+                            <label for="city" class="form-label">Cidade*</label>
+                            <input autocomplete="off" class="form-control" id="city" name="city"
+                                placeholder="Ex: Condado" type="text" required>
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label for="state" class="form-label">Estado (UF)*</label>
+                            <select class="form-select" id="state" name="state" required>
+                                <option value="" disabled selected>UF</option>
+                                <option value="AC">AC</option>
+                                <option value="AL">AL</option>
+                                <option value="AP">AP</option>
+                                <option value="AM">AM</option>
+                                <option value="BA">BA</option>
+                                <option value="CE">CE</option>
+                                <option value="DF">DF</option>
+                                <option value="ES">ES</option>
+                                <option value="GO">GO</option>
+                                <option value="MA">MA</option>
+                                <option value="MT">MT</option>
+                                <option value="MS">MS</option>
+                                <option value="MG">MG</option>
+                                <option value="PA">PA</option>
+                                <option value="PB">PB</option>
+                                <option value="PR">PR</option>
+                                <option value="PE">PE</option>
+                                <option value="PI">PI</option>
+                                <option value="RJ">RJ</option>
+                                <option value="RN">RN</option>
+                                <option value="RS">RS</option>
+                                <option value="RO">RO</option>
+                                <option value="RR">RR</option>
+                                <option value="SC">SC</option>
+                                <option value="SP">SP</option>
+                                <option value="SE">SE</option>
+                                <option value="TO">TO</option>
+                            </select>
+                        </div>
+                    </div>
+                </fieldset>
+
+                <button class="btn btn-primary w-50 d-block mx-auto mb-5" type="submit">Cadastrar
+                    Estabelecimento</button>
+            </form>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

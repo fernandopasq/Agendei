@@ -1,6 +1,11 @@
-import sqlite3
+import re
+
 from flask import render_template, redirect, session, g
 from functools import wraps
+from geopy.exc import GeocoderTimedOut, GeocoderServiceError
+from geopy.geocoders import Nominatim
+import sqlite3
+import time
 
 # Decorator to ensure user is logged in
 def login_required(f):
@@ -38,3 +43,29 @@ def close_db(exception=None):
     db = g.pop("db", None)
     if db is not None:
         db.close()
+
+
+# ---- Normalização de Endereços -----
+
+def normalize_street(street):
+    if not street:
+        return ""
+    
+    # Remove espaços extras no início/fim
+    street = street.strip()
+    
+    # Dicionário de substituições para os tipos de logradouro mais comuns no Brasil
+    replacements = {
+        r'^\b(Av|Avd|Aven)\b\.?': 'Avenida',
+        r'^\b(R|Rua)\b\.?': 'Rua',
+        r'^\b(Al|Alam)\b\.?': 'Alameda',
+        r'^\b(Pça|Pca)\b\.?': 'Praça',
+        r'^\b(Rod)\b\.?': 'Rodovia',
+        r'^\b(Dr|Doutor)\b\.?': 'Doutor',
+        r'^\b(Prof|Professor)\b\.?': 'Professor'
+    }
+    
+    for pattern, replacement in replacements.items():
+        street = re.sub(pattern, replacement, street, flags=re.IGNORECASE)
+        
+    return street
