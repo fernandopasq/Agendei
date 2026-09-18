@@ -4,7 +4,7 @@ from flask import Flask, redirect
 from flask_session import Session
 
 # Import helpers
-from helpers import apology, brl, close_db
+from helpers import apology, brl, category_slug, close_db
 
 # Import Blueprints
 from blueprints.client import client_bp
@@ -15,6 +15,7 @@ app = Flask(__name__)
 
 # Custom filter
 app.jinja_env.filters["brl"] = brl  # -> R$
+app.jinja_env.filters["category_slug"] = category_slug
 
 # Configure session to use filesystem
 app.config["SESSION_PERMANENT"] = False

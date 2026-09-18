@@ -1,4 +1,5 @@
 import re
+import unicodedata
 
 from flask import render_template, redirect, session, g
 from functools import wraps
@@ -24,6 +25,16 @@ def apology(message, code=400):
 def brl(value):
     """Format value as BRL."""
     return f"R${value:,.2f}"
+
+
+def category_slug(category):
+    """Convert a category label into a stable CSS-friendly slug."""
+    if not category:
+        return "outros"
+
+    normalized = unicodedata.normalize("NFKD", category)
+    normalized = "".join(char for char in normalized if not unicodedata.combining(char))
+    return re.sub(r"[^a-z0-9]+", "-", normalized.lower()).strip("-") or "outros"
 
 
 # ---- Database Related Helpers -----

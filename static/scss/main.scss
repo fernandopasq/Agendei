@@ -256,3 +256,60 @@ body {
   color: $ctp-subtext0;
   border-top: 1px solid $ctp-surface1;
 }
+
+// ==============================================================================
+// 6. COMPONENTE: BADGE DE CATEGORIA DINÂMICA
+// ==============================================================================
+
+// Estilo Base do Badge
+.badge-category {
+  // Cor Padrão / Fallback (Teal)
+  --cat-color: #{$ctp-teal};
+
+  background-color: color-mix(in srgb, var(--cat-color) 15%, transparent);
+  color: var(--cat-color);
+  border: 1px solid color-mix(in srgb, var(--cat-color) 35%, transparent);
+  font-weight: 600;
+
+  // Mapeamento automático por data-category usando variáveis locais
+  &[data-category="beleza-e-estetica"],
+  &[data-category="salao-de-beleza"],
+  &[data-category="barbearia"],
+  &[data-category="manicure"] {
+    --cat-color: #{$ctp-blue};
+  }
+
+  &[data-category="eventos-e-fotografia"] {
+    --cat-color: #{$ctp-pink};
+  }
+
+  &[data-category="educacao-e-consultoria"],
+  &[data-category="consultoria"],
+  &[data-category="estetica"] {
+    --cat-color: #{$ctp-mauve};
+  }
+
+  &[data-category="pets"],
+  &[data-category="pet-shop"] {
+    --cat-color: #{$ctp-peach};
+  }
+
+  &[data-category="saude-e-bem-estar"],
+  &[data-category="saude"] {
+    --cat-color: #{$ctp-teal};
+  }
+
+  &[data-category="esportes-e-fitness"],
+  &[data-category="tatuagem"] {
+    --cat-color: #{$ctp-lavender};
+  }
+
+  &[data-category="servicos-automotivos"],
+  &[data-category="oficina"] {
+    --cat-color: #{$ctp-red};
+  }
+
+  &[data-category="servicos-domesticos"] {
+    --cat-color: #{$ctp-sky};
+  }
+}

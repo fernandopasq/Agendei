@@ -12481,4 +12481,36 @@ body {
   background-color: #181825;
   color: #a6adc8;
   border-top: 1px solid #45475a;
+}
+
+.badge-category {
+  --cat-color: #94e2d5;
+  background-color: color-mix(in srgb, var(--cat-color) 15%, transparent);
+  color: var(--cat-color);
+  border: 1px solid color-mix(in srgb, var(--cat-color) 35%, transparent);
+  font-weight: 600;
+}
+.badge-category[data-category=beleza-e-estetica], .badge-category[data-category=salao-de-beleza], .badge-category[data-category=barbearia], .badge-category[data-category=manicure] {
+  --cat-color: #89b4fa;
+}
+.badge-category[data-category=eventos-e-fotografia] {
+  --cat-color: #f5c2e7;
+}
+.badge-category[data-category=educacao-e-consultoria], .badge-category[data-category=consultoria], .badge-category[data-category=estetica] {
+  --cat-color: #cba6f7;
+}
+.badge-category[data-category=pets], .badge-category[data-category=pet-shop] {
+  --cat-color: #fab387;
+}
+.badge-category[data-category=saude-e-bem-estar], .badge-category[data-category=saude] {
+  --cat-color: #94e2d5;
+}
+.badge-category[data-category=esportes-e-fitness], .badge-category[data-category=tatuagem] {
+  --cat-color: #b4befe;
+}
+.badge-category[data-category=servicos-automotivos], .badge-category[data-category=oficina] {
+  --cat-color: #f38ba8;
+}
+.badge-category[data-category=servicos-domesticos] {
+  --cat-color: #89dceb;
 }/*# sourceMappingURL=main.css.map */

@@ -18,7 +18,9 @@ Criar Serviço - {{ business.business_name }}
             
             <!-- Cabeçalho do Card -->
             <div class="mb-4">
-                <span class="badge bg-secondary text-dark border mb-2">{{ business.category }}</span>
+                <span class="badge badge-category mb-2" data-category="{{ business.category | category_slug }}">
+                    {{ business.category }}
+                </span>
                 <h1 class="h4 fw-bold mb-1">Cadastrar Novo Serviço</h1>
                 <p class="text-muted small mb-0">
                     Preencha as informações do serviço oferecido em <strong>{{ business.business_name }}</strong>.

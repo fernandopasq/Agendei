@@ -3,6 +3,7 @@
 {% block title %}Início - Encontre Serviços{% endblock %}
 
 {% block body %}
+
 <div class="container py-4">
 
     <!-- Cabeçalho e Barra de Pesquisa -->
@@ -17,44 +18,54 @@
             <div class="row g-3">
 
                 <!-- Pesquisa de Nome -->
-                <div class="col-12 col-md-4">
+                <div class="col-12 col-md-3">
                     <label class="form-label small fw-semibold text-muted">Buscar Estabelecimento</label>
                     <div class="input-group">
                         <span class="input-group-text bg-transparent border-end-0"><i class="bi bi-search"></i></span>
-                        <input type="text" name="q" class="form-control border-start-0" placeholder="Nome do local..."
-                            value="{{ search_query }}">
+                        <input type="text" name="q" class="form-control border-start-0" placeholder="Nome do local..." value="{{ search_query }}">
                     </div>
                 </div>
 
+                <!-- Filtro por Estado -->
+                <div class="col-12 col-sm-6 col-md-2">
+                    <label class="form-label small fw-semibold text-muted">Estado</label>
+                    <select name="state" class="form-select">
+                        <option value="">Todos</option>
+                        {% for st in states %}
+                            <option value="{{ st }}" {% if st == selected_state %}selected{% endif %}>{{ st }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
                 <!-- Filtro por Cidade -->
-                <div class="col-12 col-md-3">
+                <div class="col-12 col-sm-6 col-md-2">
                     <label class="form-label small fw-semibold text-muted">Cidade</label>
                     <select name="city" class="form-select">
-                        <option value="">Todas as Cidades</option>
+                        <option value="">Todas</option>
                         {% for c in cities %}
-                        <option value="{{ c }}" {% if c==selected_city %}selected{% endif %}>{{ c }}</option>
+                            <option value="{{ c }}" {% if c == selected_city %}selected{% endif %}>{{ c }}</option>
                         {% endfor %}
                     </select>
                 </div>
 
                 <!-- Filtro por Bairro -->
-                <div class="col-12 col-md-2">
+                <div class="col-12 col-sm-6 col-md-2">
                     <label class="form-label small fw-semibold text-muted">Bairro</label>
                     <select name="neighborhood" class="form-select">
                         <option value="">Todos</option>
                         {% for n in neighborhoods %}
-                        <option value="{{ n }}" {% if n==selected_neighborhood %}selected{% endif %}>{{ n }}</option>
+                            <option value="{{ n }}" {% if n == selected_neighborhood %}selected{% endif %}>{{ n }}</option>
                         {% endfor %}
                     </select>
                 </div>
 
-                <!-- Filtro por Serviço -->
-                <div class="col-12 col-md-3">
-                    <label class="form-label small fw-semibold text-muted">Tipo de Serviço</label>
-                    <select name="service" class="form-select">
-                        <option value="">Todos os Serviços</option>
-                        {% for s in services_list %}
-                        <option value="{{ s }}" {% if s==selected_service %}selected{% endif %}>{{ s }}</option>
+                <!-- Filtro por Categoria -->
+                <div class="col-12 col-sm-6 col-md-3">
+                    <label class="form-label small fw-semibold text-muted">Categoria</label>
+                    <select name="category" class="form-select">
+                        <option value="">Todas as Categorias</option>
+                        {% for cat in categories %}
+                            <option value="{{ cat }}" {% if cat == selected_category %}selected{% endif %}>{{ cat }}</option>
                         {% endfor %}
                     </select>
                 </div>
@@ -62,8 +73,8 @@
             </div>
 
             <div class="d-flex justify-content-end gap-2 mt-3 pt-2 border-top">
-                {% if search_query or selected_city or selected_neighborhood or selected_service %}
-                <a href="/" class="btn btn-outline-secondary btn-sm d-flex align-items-center">Limpar Filtros</a>
+                {% if search_query or selected_state or selected_city or selected_neighborhood or selected_category %}
+                    <a href="/" class="btn btn-outline-secondary btn-sm d-flex align-items-center">Limpar Filtros</a>
                 {% endif %}
                 <button type="submit" class="btn btn-primary px-4">Filtrar</button>
             </div>
@@ -72,62 +83,75 @@
 
     <!-- Lista de Cards de Estabelecimentos -->
     {% if businesses %}
-    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-        {% for b in businesses %}
-        <div class="col">
-            <div class="card h-100 border-0 shadow-sm">
-                <div class="card-body p-4 d-flex flex-column">
-                    <div class="d-flex justify-content-between align-items-start mb-2">
-                        <h2 class="h5 fw-bold mb-0">{{ b.business_name }}</h2>
-                        <span
-                            class="badge bg-secondary bg-opacity-10 text-dark border border-secondary border-opacity-25 fw-normal">
-                            {{ b.category }}
-                        </span>
-                    </div>
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            {% for b in businesses %}
+                <div class="col">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body p-4 d-flex flex-column">
 
-                    <p class="text-muted small mb-3 flex-grow-1">
-                        {{ b.description or 'Sem descrição cadastrada.' }}
-                    </p>
+                            <!-- Nome e Badge da Categoria -->
+                            <div class="d-flex justify-content-between align-items-start mb-2 gap-2">
+                                <h2 class="h5 fw-bold mb-0">{{ b.business_name }}</h2>
+                                <span class="badge badge-category px-2 py-1"
+                                      data-category="{{ b.category | category_slug }}">
+                                    {{ b.category }}
+                                </span>
+                            </div>
 
-                    <div class="text-muted small mb-3">
-                        <i class="bi bi-geo-alt me-1"></i>
-                        {{ b.neighborhood }}, {{ b.city }}/{{ b.state }}
-                    </div>
+                            <!-- Descrição -->
+                            <p class="text-muted small mb-3 flex-grow-1">
+                                {{ b.description or 'Sem descrição cadastrada.' }}
+                            </p>
 
-                    <div class="pt-3 border-top mt-auto">
-                        {% if session.user_id %}
-                        <!-- Usuário Logado: Encaminha para o agendamento -->
-                        <a href="/appointment/new/{{ b.business_id }}" class="btn btn-primary w-100 fw-semibold">
-                            Agendar Atendimento
-                        </a>
-                        {% else %}
-                        <!-- Usuário Não Logado: Abre Modal de Aviso -->
-                        <button type="button" class="btn btn-primary w-100 fw-semibold" data-bs-toggle="modal"
-                            data-bs-target="#authRequiredModal">
-                            Agendar Atendimento
-                        </button>
-                        {% endif %}
+                            <!-- Badges dos Serviços Oferecidos -->
+                            {% if b.services_list %}
+                                <div class="d-flex flex-wrap gap-1 mb-3">
+                                    {% for s_name in b.services_list.split(',') %}
+                                        <span class="badge bg-surface1 text-text border border-surface2 border-opacity-25 fw-normal px-2 py-1">
+                                            {{ s_name.strip() }}
+                                        </span>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+
+                            <!-- Localização -->
+                            <div class="text-muted small mb-3">
+                                <i class="bi bi-geo-alt me-1"></i>
+                                {{ b.neighborhood }}, {{ b.city }}/{{ b.state }}
+                            </div>
+
+                            <!-- Botão de Agendamento -->
+                            <div class="pt-3 border-top mt-auto">
+                                {% if session.user_id %}
+                                    <a href="/appointment/new/{{ b.business_id }}" class="btn btn-primary w-100 fw-semibold">
+                                        Agendar Atendimento
+                                    </a>
+                                {% else %}
+                                    <button type="button" class="btn btn-primary w-100 fw-semibold" data-bs-toggle="modal" data-bs-target="#authRequiredModal">
+                                        Agendar Atendimento
+                                    </button>
+                                {% endif %}
+                            </div>
+
+                        </div>
                     </div>
                 </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="card border-0 shadow-sm py-5 text-center">
+            <div class="card-body">
+                <i class="bi bi-building-exclamation text-muted display-4 mb-3 d-block"></i>
+                <h3 class="h5 fw-bold">Nenhum estabelecimento encontrado</h3>
+                <p class="text-muted small mb-0">Tente ajustar seus termos de pesquisa ou remover os filtros aplicados.</p>
             </div>
         </div>
-        {% endfor %}
-    </div>
-    {% else %}
-    <div class="card border-0 shadow-sm py-5 text-center">
-        <div class="card-body">
-            <i class="bi bi-building-exclamation text-muted display-4 mb-3 d-block"></i>
-            <h3 class="h5 fw-bold">Nenhum estabelecimento encontrado</h3>
-            <p class="text-muted small mb-0">Tente ajustar seus termos de pesquisa ou remover os filtros aplicados.</p>
-        </div>
-    </div>
     {% endif %}
 
 </div>
 
 <!-- Modal: Registro / Login Necessário -->
-<div class="modal fade" id="authRequiredModal" tabindex="-1" aria-labelledby="authRequiredModalLabel"
-    aria-hidden="true">
+<div class="modal fade" id="authRequiredModal" tabindex="-1" aria-labelledby="authRequiredModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow">
             <div class="modal-header border-0 pb-0">
@@ -146,4 +170,5 @@
         </div>
     </div>
 </div>
+
 {% endblock %}
