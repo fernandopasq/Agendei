@@ -5,7 +5,7 @@ Painel do Prestador - {{ business.business_name }}
 {% endblock %}
 
 {% block body %}
-<div class="container py-4">
+<div class="container py-4 d-flex flex-column">
 
     <!-- Cabeçalho / Voltar -->
     <div class="mb-4">
@@ -24,7 +24,7 @@ Painel do Prestador - {{ business.business_name }}
     </div>
 
     <!-- SEÇÃO 1: Minha Agenda de Atendimentos -->
-    <div class="card border-0 shadow-sm mb-4">
+    <div class="card border-0 shadow-sm mb-4 order-2">
         <div class="card-body p-4">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h2 class="h5 fw-bold mb-0">Minha Agenda de Atendimentos</h2>
@@ -92,7 +92,7 @@ Painel do Prestador - {{ business.business_name }}
     </div>
 
     <!-- SEÇÃO 2: Catálogo e Gerenciamento de Serviços do Prestador -->
-    <div class="card border-0 shadow-sm mb-4">
+    <div class="card border-0 shadow-sm mb-4 order-1">
         <div class="card-body p-4">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h2 class="h5 fw-bold mb-0">Serviços Oferecidos no Local</h2>

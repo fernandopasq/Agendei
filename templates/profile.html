@@ -1,0 +1,112 @@
+{% extends "layout.html" %}
+
+{% block title %}Meu Perfil{% endblock %}
+
+{% block body %}
+<div class="container py-4" style="max-width: 760px;">
+    <div class="mb-4">
+        <h1 class="h3 fw-bold mb-1">Meu Perfil</h1>
+        <p class="text-muted mb-0">Atualize suas informações de conta e contato.</p>
+    </div>
+
+    <form method="post">
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body p-4">
+                <h2 class="h5 fw-bold mb-3">Dados da conta</h2>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="name" class="form-label">Nome</label>
+                        <div class="profile-field d-flex align-items-center gap-2" data-field="name">
+                            <span class="profile-value flex-grow-1">{{ user.name }}</span>
+                            <input class="form-control d-none flex-grow-1" id="name" name="name" value="{{ user.name }}" required>
+                            <button class="btn btn-outline-secondary btn-sm profile-edit" type="button">Editar</button>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="surename" class="form-label">Sobrenome</label>
+                        <div class="profile-field d-flex align-items-center gap-2" data-field="surename">
+                            <span class="profile-value flex-grow-1">{{ user.surename }}</span>
+                            <input class="form-control d-none flex-grow-1" id="surename" name="surename" value="{{ user.surename }}" required>
+                            <button class="btn btn-outline-secondary btn-sm profile-edit" type="button">Editar</button>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <label for="username" class="form-label">Nome de usuário</label>
+                        <div class="profile-field d-flex align-items-center gap-2" data-field="username">
+                            <span class="profile-value flex-grow-1">@{{ user.username }}</span>
+                            <input class="form-control d-none flex-grow-1" id="username" name="username" value="{{ user.username }}" required>
+                            <button class="btn btn-outline-secondary btn-sm profile-edit" type="button">Editar</button>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <label for="phone_number" class="form-label">Telefone</label>
+                        <div class="profile-field d-flex align-items-center gap-2" data-field="phone">
+                            <span class="profile-value flex-grow-1">{{ user.phone|phone }}</span>
+                            <div class="input-group d-none flex-grow-1 profile-input">
+                                <select class="form-select" name="phone_ddd" aria-label="DDD" required style="max-width: 110px;">
+                                    {% for ddd in ddd_codes %}
+                                        <option value="{{ ddd }}" {% if user.phone[:2] == ddd %}selected{% endif %}>({{ ddd }})</option>
+                                    {% endfor %}
+                                </select>
+                                <input class="form-control" id="phone_number" name="phone_number" value="{{ user.phone[2:] }}" pattern="[0-9]{4,5}-?[0-9]{4}" required>
+                            </div>
+                            <button class="btn btn-outline-secondary btn-sm profile-edit" type="button">Editar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-center gap-3">
+                    <div>
+                        <h2 class="h5 fw-bold mb-1">Senha</h2>
+                        <p class="text-muted small mb-0">Sua senha permanece protegida.</p>
+                    </div>
+                    <button class="btn btn-outline-secondary btn-sm" type="button" id="show-password-fields">Alterar senha</button>
+                </div>
+                <div class="row g-3 d-none mt-1" id="password-fields">
+                    <div class="col-12">
+                        <label for="current_password" class="form-label">Senha atual</label>
+                        <input class="form-control" id="current_password" name="current_password" type="password" autocomplete="current-password">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="new_password" class="form-label">Nova senha</label>
+                        <input class="form-control" id="new_password" name="new_password" type="password" autocomplete="new-password">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="confirmation" class="form-label">Confirmar nova senha</label>
+                        <input class="form-control" id="confirmation" name="confirmation" type="password" autocomplete="new-password">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-end">
+            <button class="btn btn-primary px-4" type="submit">Salvar alterações</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.querySelectorAll('.profile-edit').forEach(button => {
+        button.addEventListener('click', () => {
+            const field = button.closest('.profile-field');
+            field.querySelector('.profile-value')?.classList.add('d-none');
+            field.querySelector('.profile-input, input')?.classList.remove('d-none');
+            button.classList.add('d-none');
+            field.querySelector('input, select')?.focus();
+        });
+    });
+
+    document.getElementById('show-password-fields').addEventListener('click', event => {
+        document.getElementById('password-fields').classList.remove('d-none');
+        event.currentTarget.classList.add('d-none');
+        document.getElementById('current_password').focus();
+    });
+</script>
+{% endblock %}

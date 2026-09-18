@@ -8,8 +8,13 @@
 
     <!-- Cabeçalho e Barra de Pesquisa -->
     <div class="text-center mb-4">
-        <h1 class="display-6 fw-bold mb-2">Encontre e Agende Serviços</h1>
-        <p class="text-muted">Descubra estabelecimentos e profissionais perto de você</p>
+        {% if user_name %}
+            <h1 class="display-6 fw-bold mb-2">Bem-vindo, {{ user_name }}!</h1>
+            <p class="text-muted">Encontre e agende seu próximo serviço</p>
+        {% else %}
+            <h1 class="display-6 fw-bold mb-2">Encontre e Agende Serviços</h1>
+            <p class="text-muted">Descubra estabelecimentos e profissionais perto de você</p>
+        {% endif %}
     </div>
 
     <!-- Formulário de Filtros e Busca -->
@@ -29,7 +34,7 @@
                 <!-- Filtro por Estado -->
                 <div class="col-12 col-sm-6 col-md-2">
                     <label class="form-label small fw-semibold text-muted">Estado</label>
-                    <select name="state" class="form-select">
+                    <select name="state" id="state-filter" class="form-select">
                         <option value="">Todos</option>
                         {% for st in states %}
                             <option value="{{ st }}" {% if st == selected_state %}selected{% endif %}>{{ st }}</option>
@@ -40,9 +45,9 @@
                 <!-- Filtro por Cidade -->
                 <div class="col-12 col-sm-6 col-md-2">
                     <label class="form-label small fw-semibold text-muted">Cidade</label>
-                    <select name="city" class="form-select">
+                    <select name="city" id="city-filter" class="form-select">
                         <option value="">Todas</option>
-                        {% for c in cities %}
+                        {% for c in (locations[selected_state].keys() if selected_state else cities) %}
                             <option value="{{ c }}" {% if c == selected_city %}selected{% endif %}>{{ c }}</option>
                         {% endfor %}
                     </select>
@@ -51,9 +56,9 @@
                 <!-- Filtro por Bairro -->
                 <div class="col-12 col-sm-6 col-md-2">
                     <label class="form-label small fw-semibold text-muted">Bairro</label>
-                    <select name="neighborhood" class="form-select">
+                    <select name="neighborhood" id="neighborhood-filter" class="form-select">
                         <option value="">Todos</option>
-                        {% for n in neighborhoods %}
+                        {% for n in (locations[selected_state][selected_city] if selected_state and selected_city else neighborhoods) %}
                             <option value="{{ n }}" {% if n == selected_neighborhood %}selected{% endif %}>{{ n }}</option>
                         {% endfor %}
                     </select>
@@ -149,6 +154,44 @@
     {% endif %}
 
 </div>
+
+{% block scripts %}
+<script type="application/json" id="location-hierarchy">{{ locations | tojson }}</script>
+<script>
+    const locationHierarchy = JSON.parse(document.getElementById('location-hierarchy').textContent);
+    const stateFilter = document.getElementById('state-filter');
+    const cityFilter = document.getElementById('city-filter');
+    const neighborhoodFilter = document.getElementById('neighborhood-filter');
+
+    function addOptions(select, values, emptyLabel) {
+        select.innerHTML = `<option value="">${emptyLabel}</option>`;
+        values.forEach(value => {
+            select.add(new Option(value, value));
+        });
+    }
+
+    function updateLocationFilters() {
+        const state = stateFilter.value;
+        const city = cityFilter.value;
+        const cities = state && locationHierarchy[state]
+            ? Object.keys(locationHierarchy[state]).sort()
+            : Object.values(locationHierarchy).flatMap(stateCities => Object.keys(stateCities)).filter((value, index, all) => all.indexOf(value) === index).sort();
+        const neighborhoods = state && city && locationHierarchy[state]?.[city]
+            ? locationHierarchy[state][city].slice().sort()
+            : Object.values(locationHierarchy).flatMap(stateCities => Object.values(stateCities)).flat().filter((value, index, all) => all.indexOf(value) === index).sort();
+
+        addOptions(cityFilter, cities, 'Todas');
+        if (cities.includes(city)) cityFilter.value = city;
+        addOptions(neighborhoodFilter, state && city ? neighborhoods : neighborhoods, 'Todos');
+    }
+
+    stateFilter.addEventListener('change', () => {
+        addOptions(cityFilter, stateFilter.value && locationHierarchy[stateFilter.value] ? Object.keys(locationHierarchy[stateFilter.value]).sort() : [], 'Todas');
+        addOptions(neighborhoodFilter, [], 'Todos');
+    });
+    cityFilter.addEventListener('change', updateLocationFilters);
+</script>
+{% endblock %}
 
 <!-- Modal: Registro / Login Necessário -->
 <div class="modal fade" id="authRequiredModal" tabindex="-1" aria-labelledby="authRequiredModalLabel" aria-hidden="true">

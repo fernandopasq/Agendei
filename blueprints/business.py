@@ -2,7 +2,7 @@ import sqlite3
 from flask import Blueprint, redirect, render_template, request, session, url_for, flash
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from helpers import apology, get_db, normalize_street
+from helpers import apology, get_db, normalize_phone, normalize_street
 
 # Definindo o Blueprint com prefixo de URL automático
 business_bp = Blueprint("business", __name__, url_prefix="/business")
@@ -121,6 +121,8 @@ def register_business():
             return apology("Deve informar Sobrenome", 403)
         elif not request.form.get("password"):
             return apology("Deve informar senha", 403)
+        elif not normalize_phone(request.form.get("phone_ddd"), request.form.get("phone_number")):
+            return apology("Informe um telefone válido.", 403)
         elif request.form.get("password") != request.form.get("confirmation"):
             return apology("Senhas devem ser iguais", 403)
 
@@ -131,11 +133,16 @@ def register_business():
         if cursor.fetchone() is not None:
             return apology("Nome de usuário já registrado", 403)
 
+        phone = normalize_phone(request.form.get("phone_ddd"), request.form.get("phone_number"))
+        cursor.execute("SELECT 1 FROM users WHERE phone = ?", (phone,))
+        if cursor.fetchone() is not None:
+            return apology("Este número de telefone já está cadastrado.", 403)
+
         hash = generate_password_hash(request.form.get("password"))
 
         cursor.execute(
-            "INSERT INTO users (username, password_hash, name, surename, user_type) VALUES (?, ?, ?, ?, ?)",
-            (request.form.get("username"), hash, request.form.get("name"), request.form.get("surename"), 1)
+            "INSERT INTO users (username, password_hash, name, surename, phone, user_type) VALUES (?, ?, ?, ?, ?, ?)",
+            (request.form.get("username"), hash, request.form.get("name"), request.form.get("surename"), phone, 1)
         )
         conn.commit()
 
@@ -162,15 +169,22 @@ def add_store():
         neighborhood = request.form.get("neighborhood")
         city = request.form.get("city")
         state = request.form.get("state")
+        phone = normalize_phone(request.form.get("phone_ddd"), request.form.get("phone_number"))
 
         street = normalize_street(street)
         cep = cep.replace("-", "").strip() if cep else None
 
         if not business_name or not street or not number or not neighborhood or not city or not state:
             return apology("Preencha todos os campos obrigatórios do endereço.", 400)
+        if not phone:
+            return apology("Informe um telefone válido para o estabelecimento.", 400)
 
         conn = get_db()
         cursor = conn.cursor()
+        cursor.execute("SELECT 1 FROM business WHERE phone = ?", (phone,))
+        if cursor.fetchone() is not None:
+            conn.close()
+            return apology("Este número de telefone já está cadastrado em outro estabelecimento.", 400)
         cursor.execute(
             """
             INSERT INTO business (
@@ -178,6 +192,7 @@ def add_store():
                 business_name, 
                 description, 
                 category,
+                phone,
                 cep, 
                 street, 
                 number, 
@@ -185,13 +200,14 @@ def add_store():
                 neighborhood, 
                 city, 
                 state
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 session["user_id"],
                 business_name,
                 description,
                 category,
+                phone,
                 cep,
                 street,
                 number,
@@ -595,9 +611,12 @@ def create_service(business_id):
     name = request.form.get("name")
     description = request.form.get("description")
     price = request.form.get("price")
+    duration_minutes = request.form.get("duration_minutes", type=int)
 
-    if not name or not price:
-        return apology("Nome e preço do serviço são obrigatórios.", 400)
+    if not name or not price or not duration_minutes:
+        return apology("Nome, preço e duração do serviço são obrigatórios.", 400)
+    if duration_minutes < 5 or duration_minutes > 1440:
+        return apology("A duração deve estar entre 5 e 1440 minutos.", 400)
 
     conn = get_db()
     cursor = conn.cursor()
@@ -612,10 +631,10 @@ def create_service(business_id):
 
     cursor.execute(
         """
-        INSERT INTO services (business_id, name, description, price)
-        VALUES (?, ?, ?, ?)
+        INSERT INTO services (business_id, name, description, price, duration_minutes)
+        VALUES (?, ?, ?, ?, ?)
         """,
-        (business_id, name, description, float(price))
+        (business_id, name, description, float(price), duration_minutes)
     )
     conn.commit()
     conn.close()

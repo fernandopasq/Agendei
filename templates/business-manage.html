@@ -23,7 +23,9 @@
 
                 <div class="d-flex gap-2">
                     {% if is_self_provider %}
-                    <!-- Botão direto para o proprietário configurar seus próprios serviços -->
+                    <a href="/business/view/{{ business.business_id }}" class="btn btn-outline-primary btn-sm">
+                        Ver Minha Agenda
+                    </a>
                     <a href="/business/view/{{ business.business_id }}/services" class="btn btn-outline-primary btn-sm">
                         Configurar Meus Serviços
                     </a>
@@ -121,6 +123,7 @@
                             <th>Nome</th>
                             <th>Descrição</th>
                             <th>Preço</th>
+                            <th>Duração</th>
                             <th>Prestadores Atendendo</th>
                             <th class="text-end">Ações</th>
                         </tr>
@@ -136,6 +139,7 @@
                                     R$ {{ "%.2f"|format(s.price) }}
                                 </span>
                             </td>
+                            <td>{{ s.duration_minutes or 30 }} min</td>
                             <td>
                                 {% if s.providers_list %}
                                 <div class="d-flex flex-wrap gap-1">

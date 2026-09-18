@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS users (
     surename TEXT,
     username TEXT UNIQUE,
     password_hash TEXT,
+    phone TEXT UNIQUE,
     user_type INTEGER
 );
 
@@ -14,6 +15,7 @@ CREATE TABLE IF NOT EXISTS business (
     name TEXT,
     description TEXT,
     owner_id INTEGER,
+    phone TEXT UNIQUE,
     FOREIGN KEY (owner_id) REFERENCES users (user_id)
 );
 
@@ -23,6 +25,7 @@ CREATE TABLE IF NOT EXISTS services (
     name TEXT,
     description TEXT,
     price REAL,
+    duration_minutes INTEGER NOT NULL DEFAULT 30,
     FOREIGN KEY (business_id) REFERENCES business (business_id)
 );
 
@@ -31,7 +34,9 @@ CREATE TABLE IF NOT EXISTS appointment (
     user_id INTEGER,
     provider_id INTEGER,
     service_id INTEGER,
-    date INTEGER,
+    date TEXT,
+    appointment_time TEXT,
+    duration_minutes INTEGER NOT NULL DEFAULT 30,
     status TEXT,
     FOREIGN KEY (user_id) REFERENCES users (user_id),
     FOREIGN KEY (provider_id) REFERENCES users (user_id),

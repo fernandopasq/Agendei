@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="pt-br">
 
 <head>
@@ -17,78 +16,82 @@
 
     <title>Agendei: {% block title %}{% endblock %}</title>
 
+    <!-- INCLUÍDO: Permite que arquivos filhos adicionem CSS/Links extras no head -->
+    {% block head %}{% endblock %}
 </head>
 
 <body>
     <header>
-
         <!--Navbar-->
-
         <nav class="navbar navbar-expand-lg custom-navbar">
             <div class="container-fluid">
-
                 <!--Title link-->
-
                 <a class="navbar-brand" href="/">Agendei</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
                     aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav ms-auto"> <!-- ms-auto alinha os itens à direita -->
-
-                        <!--Links of pages-->
-
+                    <ul class="navbar-nav ms-auto">
                         <li class="nav-item">
                             <a class="nav-link {% if request.path == '/' %}active{% endif %}" href="/">Home</a>
                         </li>
-
-                        <!--Links of login/register logout and partner with conditions-->
-                        <!--If logged in-->
                         {% if session.get("user_id") %}
                             <li class="nav-item">
-                                <a class="nav-link {% if request.path == '/logout' %}active{% endif %}"
-                                    href="/logout">Sair</a>
+                                <a class="nav-link {% if request.path == '/profile' %}active{% endif %}" href="{{ url_for('profile') }}">Meu Perfil</a>
+                            </li>
+                            {% if session.get("user_type") == 2 %}
+                                <li class="nav-item">
+                                    <a class="nav-link {% if request.path.startswith('/appointments') %}active{% endif %}" href="{{ url_for('client.my_appointments') }}">Meus Agendamentos</a>
+                                </li>
+                            {% endif %}
+                            <li class="nav-item">
+                                <a class="nav-link {% if request.path == '/logout' %}active{% endif %}" href="/logout">Sair</a>
                             </li>
                         {% else %}
-                            {# --- LOGIN/REGISTER USER --- #}
                             {% if not request.path.startswith('/business') %}
                                 <li class="nav-item">
-                                    <a class="nav-link {% if request.path in ['/login', '/register'] %}active{% endif %}"
-                                        href="/login">Entrar / Registrar-se</a>
+                                    <a class="nav-link {% if request.path in ['/login', '/register'] %}active{% endif %}" href="/login">Entrar / Registrar-se</a>
                                 </li>
                             {% endif %}
-
-                            {# --- LOGIN/REGISTER BUSINESS --- #}
                             {% if request.path.startswith('/business') %}
                                 <li class="nav-item">
-                                    <a class="nav-link {% if request.path in ['/business/login', '/business/register'] %}active{% endif %}"
-                                        href="/business/login">Entrar / Torne-se Parceiro</a>
+                                    <a class="nav-link {% if request.path in ['/business/login', '/business/register'] %}active{% endif %}" href="/business/login">Entrar / Torne-se Parceiro</a>
                                 </li>
                             {% endif %}
-
                             <li class="nav-item">
-                                <a class="nav-link {% if request.path == '/business' %}active{% endif %}"
-                                    href="/business">Para Parceiros</a>
+                                <a class="nav-link {% if request.path == '/business' %}active{% endif %}" href="/business">Para Parceiros</a>
                             </li>
                         {% endif %}
-
                     </ul>
                 </div>
             </div>
         </nav>
-
     </header>
 
     <main class="main-content container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="mb-3" aria-live="polite">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category if category in ['success', 'danger', 'warning', 'info'] else 'info' }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
         {% block body %}
         {% endblock %}
     </main>
 
     <footer class="custom-footer py-3 text-center">
-        <small>&copy; {{ 2026 }} Agendei - Todos os direitos reservados.</small>
+        <small>&copy; 2026 Agendei - Todos os direitos reservados.</small>
     </footer>
 
+    <!-- INCLUÍDO: Permite que arquivos filhos injetem scripts JS no final da página -->
+    {% block scripts %}{% endblock %}
 </body>
 
 </html>

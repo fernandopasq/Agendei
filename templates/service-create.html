@@ -75,6 +75,26 @@ Criar Serviço - {{ business.business_name }}
                     </div>
                 </div>
 
+                <!-- Duração -->
+                <div class="mb-4">
+                    <label for="duration_minutes" class="form-label fw-semibold">Duração do Serviço <span class="text-danger">*</span></label>
+                    <div class="input-group input-group-lg">
+                        <input
+                            type="number"
+                            class="form-control"
+                            id="duration_minutes"
+                            name="duration_minutes"
+                            min="5"
+                            max="1440"
+                            step="5"
+                            value="30"
+                            required
+                        >
+                        <span class="input-group-text bg-light text-muted">minutos</span>
+                    </div>
+                    <div class="form-text">Informe o tempo necessário para realizar este serviço.</div>
+                </div>
+
                 <hr class="my-4">
 
                 <!-- Botões de Ação -->
