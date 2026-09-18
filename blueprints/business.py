@@ -369,7 +369,8 @@ def manage_business(business_id):
         JOIN users client ON a.user_id = client.user_id
         JOIN users provider ON a.provider_id = provider.user_id
         JOIN services s ON a.service_id = s.service_id
-        WHERE s.business_id = ?
+                WHERE s.business_id = ?
+                    AND a.status NOT IN ('cancelled', 'completed')
         ORDER BY a.date ASC
     """, (business_id,))
     appointments = cursor.fetchall()
@@ -435,7 +436,9 @@ def provider_view(business_id):
         JOIN users client ON a.user_id = client.user_id
         JOIN users provider ON a.provider_id = provider.user_id
         JOIN services s ON a.service_id = s.service_id
-        WHERE s.business_id = ? AND a.provider_id = ?
+                WHERE s.business_id = ?
+                    AND a.provider_id = ?
+                    AND a.status NOT IN ('cancelled', 'completed')
         ORDER BY a.date ASC
     """, (business_id, user_id))
     appointments = cursor.fetchall()

@@ -1,5 +1,6 @@
 import re
 import unicodedata
+from datetime import datetime, timedelta
 
 from flask import render_template, redirect, session, g
 from functools import wraps
@@ -64,6 +65,7 @@ def get_db():
         g.db.row_factory = sqlite3.Row
         _ensure_booking_columns(g.db)
         _ensure_contact_columns(g.db)
+        _mark_past_appointments_completed(g.db)
     return g.db
 
 
@@ -114,6 +116,46 @@ def _ensure_contact_columns(db):
     cursor.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_business_phone_unique ON business(phone)")
 
     db.commit()
+
+
+def _mark_past_appointments_completed(db):
+    """Mark confirmed appointments whose date and time have already passed."""
+    cursor = db.cursor()
+    now = datetime.now()
+    cursor.execute("""
+        SELECT appointment_id, date, appointment_time
+        FROM appointment
+        WHERE status = 'confirmed'
+    """)
+
+    completed_ids = []
+    for appointment in cursor.fetchall():
+        try:
+            if not appointment["appointment_time"]:
+                appointment_end = datetime.strptime(str(appointment["date"]), "%Y-%m-%d")
+            else:
+                appointment_start = datetime.strptime(
+                    f"{appointment['date']} {appointment['appointment_time']}",
+                    "%Y-%m-%d %H:%M"
+                )
+                cursor.execute(
+                    "SELECT duration_minutes FROM appointment WHERE appointment_id = ?",
+                    (appointment["appointment_id"],)
+                )
+                duration = cursor.fetchone()["duration_minutes"] or 30
+                appointment_end = appointment_start + timedelta(minutes=duration)
+        except (TypeError, ValueError):
+            continue
+
+        if appointment_end <= now:
+            completed_ids.append((appointment["appointment_id"],))
+
+    if completed_ids:
+        cursor.executemany(
+            "UPDATE appointment SET status = 'completed' WHERE appointment_id = ?",
+            completed_ids
+        )
+        db.commit()
 
 
 def close_db(exception=None):

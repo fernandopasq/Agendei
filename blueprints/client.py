@@ -44,6 +44,7 @@ def index():
     cursor.execute("""
         SELECT DISTINCT state, city, neighborhood
         FROM business
+        JOIN services s ON s.business_id = business.business_id
         WHERE state IS NOT NULL AND state != ''
           AND city IS NOT NULL AND city != ''
           AND neighborhood IS NOT NULL AND neighborhood != ''
@@ -72,7 +73,7 @@ def index():
             b.*,
             GROUP_CONCAT(DISTINCT s.name) AS services_list
         FROM business b
-        LEFT JOIN services s ON b.business_id = s.business_id
+        JOIN services s ON b.business_id = s.business_id
         WHERE 1=1
     """
     params = []
@@ -102,7 +103,13 @@ def index():
     businesses = cursor.fetchall()
 
     # Consultas para popular os selects de filtro dinamicamente
-    cursor.execute("SELECT DISTINCT state FROM business WHERE state IS NOT NULL AND state != '' ORDER BY state ASC")
+    cursor.execute("""
+        SELECT DISTINCT b.state
+        FROM business b
+        JOIN services s ON s.business_id = b.business_id
+        WHERE b.state IS NOT NULL AND b.state != ''
+        ORDER BY b.state ASC
+    """)
     states = [row["state"] for row in cursor.fetchall()]
 
     cities = sorted({city for state in locations.values() for city in state})
@@ -113,7 +120,13 @@ def index():
         for neighborhood in city
     })
 
-    cursor.execute("SELECT DISTINCT category FROM business WHERE category IS NOT NULL AND category != '' ORDER BY category ASC")
+    cursor.execute("""
+        SELECT DISTINCT b.category
+        FROM business b
+        JOIN services s ON s.business_id = b.business_id
+        WHERE b.category IS NOT NULL AND b.category != ''
+        ORDER BY b.category ASC
+    """)
     categories = [row["category"] for row in cursor.fetchall()]
 
     conn.close()
@@ -274,7 +287,8 @@ def my_appointments():
         JOIN services s ON s.service_id = a.service_id
         JOIN business b ON b.business_id = s.business_id
         LEFT JOIN users u ON u.user_id = a.provider_id
-        WHERE a.user_id = ?
+                WHERE a.user_id = ?
+                    AND a.status NOT IN ('cancelled', 'completed')
         ORDER BY
             CASE WHEN a.date >= ? THEN 0 ELSE 1 END,
             ABS(julianday(a.date) - julianday(?)),
