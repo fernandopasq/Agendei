@@ -22,7 +22,67 @@ def restrict_client_area():
 # Rota Principal (Pública ou Tipo 2)
 @client_bp.route("/")
 def index():
-    return render_template("index.html")
+    conn = get_db()
+    cursor = conn.cursor()
+
+    # Recebe os parâmetros de filtro via GET
+    search_query = request.args.get("q", "").strip()
+    selected_city = request.args.get("city", "").strip()
+    selected_neighborhood = request.args.get("neighborhood", "").strip()
+    selected_service = request.args.get("service", "").strip()
+
+    # Monta a SQL dinâmica para listagem dos estabelecimentos
+    query = """
+        SELECT DISTINCT b.* 
+        FROM business b
+        LEFT JOIN services s ON b.business_id = s.business_id
+        WHERE 1=1
+    """
+    params = []
+
+    if search_query:
+        query += " AND (b.business_name LIKE ? OR b.description LIKE ?)"
+        params.extend([f"%{search_query}%", f"%{search_query}%"])
+
+    if selected_city:
+        query += " AND b.city = ?"
+        params.append(selected_city)
+
+    if selected_neighborhood:
+        query += " AND b.neighborhood = ?"
+        params.append(selected_neighborhood)
+
+    if selected_service:
+        query += " AND s.name = ?"
+        params.append(selected_service)
+
+    query += " ORDER BY b.business_name ASC"
+    cursor.execute(query, params)
+    businesses = cursor.fetchall()
+
+    # Consultas para popular os selects de filtro dinamicamente
+    cursor.execute("SELECT DISTINCT city FROM business WHERE city IS NOT NULL AND city != '' ORDER BY city ASC")
+    cities = [row["city"] for row in cursor.fetchall()]
+
+    cursor.execute("SELECT DISTINCT neighborhood FROM business WHERE neighborhood IS NOT NULL AND neighborhood != '' ORDER BY neighborhood ASC")
+    neighborhoods = [row["neighborhood"] for row in cursor.fetchall()]
+
+    cursor.execute("SELECT DISTINCT name FROM services WHERE name IS NOT NULL AND name != '' ORDER BY name ASC")
+    services_list = [row["name"] for row in cursor.fetchall()]
+
+    conn.close()
+
+    return render_template(
+        "index.html",
+        businesses=businesses,
+        cities=cities,
+        neighborhoods=neighborhoods,
+        services_list=services_list,
+        search_query=search_query,
+        selected_city=selected_city,
+        selected_neighborhood=selected_neighborhood,
+        selected_service=selected_service
+    )
 
 
 # Login de Usuário

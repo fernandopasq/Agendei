@@ -1,12 +1,149 @@
 {% extends "layout.html" %}
 
-{% block title %}
-    Home
-{% endblock %}
+{% block title %}Início - Encontre Serviços{% endblock %}
 
 {% block body %}
-<div class="container">
-    <h1>Home</h1>
-    <p>Bem vindo!</p>
+<div class="container py-4">
+
+    <!-- Cabeçalho e Barra de Pesquisa -->
+    <div class="text-center mb-4">
+        <h1 class="display-6 fw-bold mb-2">Encontre e Agende Serviços</h1>
+        <p class="text-muted">Descubra estabelecimentos e profissionais perto de você</p>
+    </div>
+
+    <!-- Formulário de Filtros e Busca -->
+    <form method="get" action="/" class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-3 p-md-4">
+            <div class="row g-3">
+
+                <!-- Pesquisa de Nome -->
+                <div class="col-12 col-md-4">
+                    <label class="form-label small fw-semibold text-muted">Buscar Estabelecimento</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-transparent border-end-0"><i class="bi bi-search"></i></span>
+                        <input type="text" name="q" class="form-control border-start-0" placeholder="Nome do local..."
+                            value="{{ search_query }}">
+                    </div>
+                </div>
+
+                <!-- Filtro por Cidade -->
+                <div class="col-12 col-md-3">
+                    <label class="form-label small fw-semibold text-muted">Cidade</label>
+                    <select name="city" class="form-select">
+                        <option value="">Todas as Cidades</option>
+                        {% for c in cities %}
+                        <option value="{{ c }}" {% if c==selected_city %}selected{% endif %}>{{ c }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Filtro por Bairro -->
+                <div class="col-12 col-md-2">
+                    <label class="form-label small fw-semibold text-muted">Bairro</label>
+                    <select name="neighborhood" class="form-select">
+                        <option value="">Todos</option>
+                        {% for n in neighborhoods %}
+                        <option value="{{ n }}" {% if n==selected_neighborhood %}selected{% endif %}>{{ n }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Filtro por Serviço -->
+                <div class="col-12 col-md-3">
+                    <label class="form-label small fw-semibold text-muted">Tipo de Serviço</label>
+                    <select name="service" class="form-select">
+                        <option value="">Todos os Serviços</option>
+                        {% for s in services_list %}
+                        <option value="{{ s }}" {% if s==selected_service %}selected{% endif %}>{{ s }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+            </div>
+
+            <div class="d-flex justify-content-end gap-2 mt-3 pt-2 border-top">
+                {% if search_query or selected_city or selected_neighborhood or selected_service %}
+                <a href="/" class="btn btn-outline-secondary btn-sm d-flex align-items-center">Limpar Filtros</a>
+                {% endif %}
+                <button type="submit" class="btn btn-primary px-4">Filtrar</button>
+            </div>
+        </div>
+    </form>
+
+    <!-- Lista de Cards de Estabelecimentos -->
+    {% if businesses %}
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        {% for b in businesses %}
+        <div class="col">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body p-4 d-flex flex-column">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h2 class="h5 fw-bold mb-0">{{ b.business_name }}</h2>
+                        <span
+                            class="badge bg-secondary bg-opacity-10 text-dark border border-secondary border-opacity-25 fw-normal">
+                            {{ b.category }}
+                        </span>
+                    </div>
+
+                    <p class="text-muted small mb-3 flex-grow-1">
+                        {{ b.description or 'Sem descrição cadastrada.' }}
+                    </p>
+
+                    <div class="text-muted small mb-3">
+                        <i class="bi bi-geo-alt me-1"></i>
+                        {{ b.neighborhood }}, {{ b.city }}/{{ b.state }}
+                    </div>
+
+                    <div class="pt-3 border-top mt-auto">
+                        {% if session.user_id %}
+                        <!-- Usuário Logado: Encaminha para o agendamento -->
+                        <a href="/appointment/new/{{ b.business_id }}" class="btn btn-primary w-100 fw-semibold">
+                            Agendar Atendimento
+                        </a>
+                        {% else %}
+                        <!-- Usuário Não Logado: Abre Modal de Aviso -->
+                        <button type="button" class="btn btn-primary w-100 fw-semibold" data-bs-toggle="modal"
+                            data-bs-target="#authRequiredModal">
+                            Agendar Atendimento
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="card border-0 shadow-sm py-5 text-center">
+        <div class="card-body">
+            <i class="bi bi-building-exclamation text-muted display-4 mb-3 d-block"></i>
+            <h3 class="h5 fw-bold">Nenhum estabelecimento encontrado</h3>
+            <p class="text-muted small mb-0">Tente ajustar seus termos de pesquisa ou remover os filtros aplicados.</p>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+
+<!-- Modal: Registro / Login Necessário -->
+<div class="modal fade" id="authRequiredModal" tabindex="-1" aria-labelledby="authRequiredModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header border-0 pb-0">
+                <h1 class="modal-title h5 fw-bold" id="authRequiredModalLabel">Conta Necessária</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body py-4">
+                <p class="mb-0 text-muted">
+                    Para agendar um serviço neste estabelecimento, você precisa estar conectado à sua conta de cliente.
+                </p>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <a href="/login" class="btn btn-outline-primary">Entrar</a>
+                <a href="/register" class="btn btn-primary">Criar Conta</a>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}
