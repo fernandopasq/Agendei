@@ -46,7 +46,7 @@ A aplicacao tambem oferece uma pagina de perfil compartilhada entre clientes e p
 - **Werkzeug:** hash e verificacao de senhas por meio de `generate_password_hash` e `check_password_hash`.
 - **SQLite:** banco de dados relacional local.
 
-As dependencias Python estao em `requirements.txt`. `pytz` e `requests` tambem fazem parte do ambiente do projeto, embora os fluxos principais estejam concentrados em Flask, SQLite e Werkzeug.
+As dependencias Python usadas diretamente pela aplicacao estao em `requirements.txt`. SQLite faz parte da biblioteca padrao do Python, e Werkzeug e Jinja2 sao instalados automaticamente como dependencias do Flask.
 
 ### Frontend
 
@@ -166,10 +166,6 @@ Concentra a area de parceiros:
 - criacao e exclusao de servicos;
 - configuracao dos servicos atendidos por cada provider;
 - agenda individual do prestador.
-
-#### `hello.py`
-
-Pequeno programa independente usado nos estudos iniciais de Python. Nao participa do fluxo principal do Flask.
 
 ## 6. Frontend, Bootstrap e SCSS
 
@@ -334,7 +330,6 @@ flask --app app run --debug
 - `flask_session/`: arquivos de sessao, ignorados pelo Git.
 - `venv/`: ambiente virtual Python, ignorado pelo Git.
 - `__pycache__/`: arquivos temporarios do Python.
-- `acompanhamento.md`: acompanhamento do desenvolvimento.
 - `LICENSE`: licenca do projeto.
 
 Antes de enviar alteracoes, e recomendavel verificar a sintaxe:

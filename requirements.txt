@@ -1,4 +1,2 @@
 Flask
 Flask-Session
-pytz
-requests

@@ -1,1 +1,0 @@
-print("Bem-vindos ao meu primeiro programa! <3")
