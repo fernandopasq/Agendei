@@ -1,62 +1,115 @@
 {% extends "layout.html" %}
 
 {% block title %}
-Home
+Home - Painel do Parceiro
 {% endblock %}
 
 {% block body %}
-<div class="container text-center py-4">
-    <h1>Bem vindo, {{ user_name}}!</h1>
-    <p>Gerencie seus estabelecimentos e agendamentos de forma simples!</p>
-</div>
-<div class="container">
-    <!-- Grid de Cards -->
-    <div class="row g-4">
-
-        <div class="col-12 col-md-4">
-            <div class="card h-100 text-center">
-                <div class="card-body d-flex flex-column align-items-center">
-                    <div class="card-icon">
-                        <!-- Ícone / SVG / Imagem -->
-                    </div>
-                    <h5 class="card-title">Adicionar Estabelecimento</h5>
-                    <p class="card-text flex-grow-1">Cadastre um novo local para oferecer seus serviços.</p>
-                    <a href="/business/addbusiness" class="btn btn-primary w-100">Adicionar</a>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-12 col-md-4">
-            <div class="card h-100 text-center">
-                <div class="card-body d-flex flex-column align-items-center">
-                    <div class="card-icon">
-                        <!-- Ícone / SVG / Imagem -->
-                    </div>
-                    <h5 class="card-title">Meus Estabelecimentos</h5>
-                    <p class="card-text flex-grow-1">Veja e edite seus locais cadastrados.</p>
-                    <a href="#" class="btn btn-primary w-100">Gerenciar</a>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-12 col-md-4">
-            <div class="card h-100 text-center">
-                <div class="card-body d-flex flex-column align-items-center">
-                    <div class="card-icon">
-                        <!-- Ícone / SVG / Imagem -->
-                    </div>
-                    <h5 class="card-title">Entrar em Equipe</h5>
-                    <p class="card-text flex-grow-1">Faça parte da equipe de um estabelecimento.</p>
-                    <a href="#" class="btn btn-primary w-100">Entrar</a>
-                </div>
-            </div>
-        </div>
-
+<div class="container py-4">
+    <!-- Cabeçalho de Boas-Vindas -->
+    <div class="text-center mb-5">
+        <h1 class="fw-bold">Bem-vindo, {{ user_name }}!</h1>
+        <p class="text-muted">Gerencie seus estabelecimentos e acompanhe suas rotinas de atendimento.</p>
     </div>
 
-</div>
-<hr class="my-4">
-<div class="container text-center my-3">
-    <h2>Agendamentos</h2>
+    <!-- SEÇÃO: Meus Estabelecimentos -->
+    <div class="mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="h4 fw-bold m-0">Meus Estabelecimentos</h2>
+            {% if businesses %}
+                <div class="d-flex gap-2">
+                    <a href="/business/join" class="btn btn-outline-secondary btn-sm">Entrar em Equipe</a>
+                    <a href="/business/addbusiness" class="btn btn-primary btn-sm">+ Cadastrar Local</a>
+                </div>
+            {% endif %}
+        </div>
+
+        {% if businesses %}
+            <!-- GRID: Exibido quando possui 1 ou mais estabelecimentos -->
+            <div class="row g-4">
+                {% for b in businesses %}
+                    <div class="col-12 col-md-6 col-lg-4">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-body d-flex flex-column p-4">
+                                
+                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                    <span class="badge bg-secondary text-dark border">{{ b.category }}</span>
+                                    {% if b.role == 'Proprietário' %}
+                                        <span class="badge bg-success bg-opacity-10 text-success fw-semibold">Proprietário</span>
+                                    {% else %}
+                                        <span class="badge bg-info bg-opacity-10 text-info fw-semibold">Prestador</span>
+                                    {% endif %}
+                                </div>
+
+                                <h5 class="card-title fw-bold mb-2">{{ b.business_name }}</h5>
+                                
+                                <p class="card-text text-muted small mb-4 flex-grow-1">
+                                    {{ b.street }}, {{ b.number }}<br>
+                                    {{ b.neighborhood }} - {{ b.city }}/{{ b.state }}
+                                </p>
+
+                                <!-- Redirecionamento condicional baseado no papel -->
+                                {% if b.role == 'Proprietário' %}
+                                    <a href="/business/manage/{{ b.business_id }}" class="btn btn-outline-primary w-100">
+                                        Gerenciar Estabelecimento
+                                    </a>
+                                {% else %}
+                                    <a href="/business/view/{{ b.business_id }}" class="btn btn-outline-primary w-100">
+                                        Ver Agenda de Atendimentos
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+        {% else %}
+            <!-- ESTADO VAZIO: Exibido quando não possui nenhum estabelecimento -->
+            <div class="card bg-light border-0 py-4 px-3 mb-4 text-center">
+                <div class="card-body">
+                    <h5 class="card-title fw-bold">Nenhum estabelecimento associado</h5>
+                    <p class="card-text text-muted col-lg-10 mx-auto">
+                        Você ainda não possui um estabelecimento cadastrado e não faz parte de nenhuma equipe de atendimento.
+                    </p>
+                </div>
+            </div>
+
+            <!-- CARDS DE AÇÃO RÁPIDA -->
+            <div class="row g-4 justify-content-center">
+                <div class="col-12 col-md-6 col-lg-5">
+                    <div class="card h-100 text-center border-0 shadow-sm">
+                        <div class="card-body d-flex flex-column align-items-center p-4">
+                            <h5 class="card-title fw-bold mb-2">Criar Estabelecimento</h5>
+                            <p class="card-text text-muted flex-grow-1 small">
+                                Cadastre seu próprio local, configure seus serviços e gerencie seus horários e colaboradores.
+                            </p>
+                            <a href="/business/addbusiness" class="btn btn-primary w-100 mt-3">Criar Agora</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-6 col-lg-5">
+                    <div class="card h-100 text-center border-0 shadow-sm">
+                        <div class="card-body d-flex flex-column align-items-center p-4">
+                            <h5 class="card-title fw-bold mb-2">Juntar-se a uma Equipe</h5>
+                            <p class="card-text text-muted flex-grow-1 small">
+                                Conecte-se a um estabelecimento existente para prestar serviços e gerenciar sua agenda de atendimentos.
+                            </p>
+                            <a href="/business/join" class="btn btn-outline-primary w-100 mt-3">Entrar em Equipe</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <hr class="my-5">
+
+    <!-- SEÇÃO: Agendamentos Gerais -->
+    <div class="mb-4 text-center">
+        <h2 class="h4 fw-bold">Próximos Agendamentos</h2>
+        <p class="text-muted small">Acompanhe e gerencie os horários marcados pelos clientes.</p>
+    </div>
 </div>
 {% endblock %}

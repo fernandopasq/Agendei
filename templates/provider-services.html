@@ -1,0 +1,67 @@
+{% extends "layout.html" %}
+
+{% block title %}Meus Serviços Prestados{% endblock %}
+
+{% block body %}
+<div class="container py-4" style="max-width: 640px;">
+
+    <!-- Botão Superior: Voltar Dinâmico -->
+    {% if is_owner %}
+        <a href="/business/manage/{{ business_id }}" class="btn btn-outline-secondary btn-sm mb-4">
+            &larr; Voltar para a Gestão
+        </a>
+    {% else %}
+        <a href="/business/view/{{ business_id }}" class="btn btn-outline-secondary btn-sm mb-4">
+            &larr; Voltar para a Agenda
+        </a>
+    {% endif %}
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-4 p-md-5">
+            <h1 class="h4 fw-bold mb-2">Selecione os Serviços que Você Atende</h1>
+            <p class="text-muted small mb-4">
+                Marque os serviços que ficarão disponíveis para agendamento com você neste estabelecimento.
+            </p>
+
+            {% if all_services %}
+                <form action="/business/view/{{ business_id }}/services" method="post">
+                    <div class="list-group mb-4">
+                        {% for s in all_services %}
+                            <label class="list-group-item d-flex justify-content-between align-items-center py-3 cursor-pointer">
+                                <div>
+                                    <input 
+                                        class="form-check-input me-2" 
+                                        type="checkbox" 
+                                        name="service_ids" 
+                                        value="{{ s.service_id }}"
+                                        {% if s.service_id in assigned %}checked{% endif %}
+                                    >
+                                    <span class="fw-bold">{{ s.name }}</span>
+                                    {% if s.description %}
+                                        <p class="text-muted small mb-0 ms-4">{{ s.description }}</p>
+                                    {% endif %}
+                                </div>
+                                <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-3 py-2 fw-semibold">
+                                    R$ {{ "%.2f"|format(s.price) }}
+                                </span>
+                            </label>
+                        {% endfor %}
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2">
+                        <!-- Botão Cancelar Dinâmico -->
+                        {% if is_owner %}
+                            <a href="/business/manage/{{ business_id }}" class="btn btn-outline-secondary">Cancelar</a>
+                        {% else %}
+                            <a href="/business/view/{{ business_id }}" class="btn btn-outline-secondary">Cancelar</a>
+                        {% endif %}
+                        <button type="submit" class="btn btn-primary px-4">Salvar Alterações</button>
+                    </div>
+                </form>
+            {% else %}
+                <p class="text-muted small mb-0">Nenhum serviço cadastrado neste estabelecimento ainda.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

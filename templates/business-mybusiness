@@ -1,0 +1,62 @@
+{% extends "layout.html" %}
+
+{% block title %}
+Home
+{% endblock %}
+
+{% block body %}
+<div class="container text-center py-4">
+    <h1>Meus estabelecimentos</h1>
+    <p>Gerencie seus estabelecimentos e agendamentos de forma simples!</p>
+</div>
+<div class="container">
+    <!-- Grid de Cards -->
+    <div class="row g-4">
+
+        <div class="col-12 col-md-4">
+            <div class="card h-100 text-center">
+                <div class="card-body d-flex flex-column align-items-center">
+                    <div class="mb-3 text-primary">
+                        <!-- Ícone / SVG / Imagem -->
+                    </div>
+                    <h5 class="card-title">Adicionar Estabelecimento</h5>
+                    <p class="card-text flex-grow-1">Cadastre um novo local para oferecer seus serviços.</p>
+                    <a href="/business/addbusiness" class="btn btn-primary w-100">Adicionar</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-md-4">
+            <div class="card h-100 text-center">
+                <div class="card-body d-flex flex-column align-items-center">
+                    <div class="mb-3 text-primary">
+                        <!-- Ícone / SVG / Imagem -->
+                    </div>
+                    <h5 class="card-title">Meus Estabelecimentos</h5>
+                    <p class="card-text flex-grow-1">Veja e edite seus locais cadastrados.</p>
+                    <a href="#" class="btn btn-primary w-100">Gerenciar</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-md-4">
+            <div class="card h-100 text-center">
+                <div class="card-body d-flex flex-column align-items-center">
+                    <div class="mb-3 text-primary">
+                        <!-- Ícone / SVG / Imagem -->
+                    </div>
+                    <h5 class="card-title">Entrar em Equipe</h5>
+                    <p class="card-text flex-grow-1">Faça parte da equipe de um estabelecimento.</p>
+                    <a href="#" class="btn btn-primary w-100">Entrar</a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+<hr class="my-4">
+<div class="container text-center my-3">
+    <h2>Agendamentos</h2>
+</div>
+{% endblock %}

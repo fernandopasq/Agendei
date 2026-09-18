@@ -1,0 +1,218 @@
+{% extends "layout.html" %}
+
+{% block title %}Gerenciar - {{ business.business_name }}{% endblock %}
+
+{% block body %}
+<div class="container py-4">
+
+    <!-- Cabeçalho -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <a href="/business/home" class="btn btn-outline-secondary btn-sm mb-2">&larr; Voltar para a Home</a>
+            <h1 class="h3 fw-bold mb-1">{{ business.business_name }}</h1>
+            <p class="text-muted mb-0">{{ business.street }}, {{ business.number }} - {{ business.neighborhood }}, {{
+                business.city }}/{{ business.state }}</p>
+        </div>
+        <a href="/business/manage/{{ business.business_id }}/service/new" class="btn btn-primary">
+            + Criar Novo Serviço
+        </a>
+    </div>
+
+        <!-- MÓDULO 1: Equipe de Atendimento -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="h5 fw-bold mb-0">Equipe de Prestadores Ativos</h2>
+
+                <div class="d-flex gap-2">
+                    {% if is_self_provider %}
+                    <!-- Botão direto para o proprietário configurar seus próprios serviços -->
+                    <a href="/business/view/{{ business.business_id }}/services" class="btn btn-outline-primary btn-sm">
+                        Configurar Meus Serviços
+                    </a>
+                    <form action="/business/manage/{{ business.business_id }}/toggle-self-provider" method="post">
+                        <button type="submit" class="btn btn-outline-danger btn-sm">
+                            Sair da Lista de Prestadores
+                        </button>
+                    </form>
+                    {% else %}
+                    <form action="/business/manage/{{ business.business_id }}/toggle-self-provider" method="post">
+                        <button type="submit" class="btn btn-outline-primary btn-sm">
+                            + Atuar como Prestador neste Local
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+
+            {% if active_members %}
+            <div class="list-group list-group-flush border-top">
+                {% for member in active_members %}
+                <div class="list-group-item d-flex justify-content-between align-items-center py-3 px-0">
+                    <div>
+                        <h6 class="fw-bold mb-0">
+                            {{ member.name }} {{ member.surename }}
+                            {% if member.user_id == business.owner_id %}
+                            <span class="badge bg-success bg-opacity-10 text-success ms-1 small">Proprietário</span>
+                            {% endif %}
+                        </h6>
+                        <small class="text-muted">@{{ member.username }}</small>
+                    </div>
+                    <div>
+                        {% if member.user_id != business.owner_id %}
+                        <form action="/business/manage/{{ business.business_id }}/reject/{{ member.user_id }}"
+                            method="post" onsubmit="return confirm('Remover este membro?');">
+                            <button type="submit" class="btn btn-outline-secondary btn-sm">Remover da Equipe</button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-muted small mb-0">Nenhum prestador ativo cadastrado nesta equipe ainda.</p>
+            {% endif %}
+        </div>
+    </div>
+
+        <!-- MÓDULO 2: Solicitações Pendentes -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-4">
+            <h2 class="h5 fw-bold mb-3">Solicitações Pendentes de Prestadores</h2>
+            {% if pending_requests %}
+            <div class="list-group list-group-flush border-top">
+                {% for req in pending_requests %}
+                <div class="list-group-item d-flex justify-content-between align-items-center py-3 px-0">
+                    <div>
+                        <h6 class="fw-bold mb-0">{{ req.name }} {{ req.surename }}</h6>
+                        <small class="text-muted">@{{ req.username }}</small>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <form action="/business/manage/{{ business.business_id }}/approve/{{ req.user_id }}"
+                            method="post">
+                            <button type="submit" class="btn btn-success btn-sm px-3">Aprovar</button>
+                        </form>
+                        <form action="/business/manage/{{ business.business_id }}/reject/{{ req.user_id }}"
+                            method="post">
+                            <button type="submit" class="btn btn-outline-danger btn-sm px-3">Recusar</button>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-muted small mb-0">Nenhuma solicitação pendente.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- MÓDULO 3: Serviços Cadastrados -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="h5 fw-bold mb-0">Serviços Oferecidos</h2>
+                <a href="/business/manage/{{ business.business_id }}/service/new" class="btn btn-primary btn-sm">
+                    + Criar Novo Serviço
+                </a>
+            </div>
+
+            {% if services %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>Descrição</th>
+                            <th>Preço</th>
+                            <th>Prestadores Atendendo</th>
+                            <th class="text-end">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for s in services %}
+                        <tr>
+                            <td class="fw-bold">{{ s.name }}</td>
+                            <td class="text-muted small">{{ s.description or '-' }}</td>
+                            <td>
+                                <span
+                                    class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2 py-1 fw-semibold">
+                                    R$ {{ "%.2f"|format(s.price) }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if s.providers_list %}
+                                <div class="d-flex flex-wrap gap-1">
+                                    {% for provider_name in s.providers_list.split(', ') %}
+                                    <span
+                                        class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 fw-semibold py-1 px-2">
+                                        <i class="bi bi-person-fill me-1"></i>{{ provider_name }}
+                                    </span>
+                                    {% endfor %}
+                                </div>
+                                {% else %}
+                                <span class="badge bg-secondary bg-opacity-10 text-secondary fw-normal py-1 px-2">
+                                    Nenhum prestador alistado
+                                </span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end">
+                                <form
+                                    action="/business/manage/{{ business.business_id }}/service/{{ s.service_id }}/delete"
+                                    method="post" onsubmit="return confirm('Deseja realmente remover este serviço?');"
+                                    class="d-inline">
+                                    <button type="submit" class="btn btn-outline-danger btn-sm">Remover</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-muted small mb-0">Nenhum serviço cadastrado até o momento.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- MÓDULO 4: Agendamentos do Estabelecimento -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-4">
+            <h2 class="h5 fw-bold mb-3">Agendamentos</h2>
+            {% if appointments %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Data/Hora</th>
+                            <th>Serviço</th>
+                            <th>Cliente</th>
+                            <th>Prestador</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for app in appointments %}
+                        <tr>
+                            <td>{{ app.date }}</td>
+                            <td class="fw-bold">{{ app.service_name }}</td>
+                            <td>{{ app.client_name }} {{ app.client_surename }}</td>
+                            <td>{{ app.provider_name }} {{ app.provider_surename }}</td>
+                            <td>
+                                <span
+                                    class="badge {% if app.status == 'cancelled' %}bg-danger{% else %}bg-success{% endif %}">
+                                    {{ app.status }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-muted small mb-0">Nenhum agendamento registrado para este estabelecimento.</p>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+{% endblock %}

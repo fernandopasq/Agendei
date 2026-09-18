@@ -2,10 +2,7 @@ import re
 
 from flask import render_template, redirect, session, g
 from functools import wraps
-from geopy.exc import GeocoderTimedOut, GeocoderServiceError
-from geopy.geocoders import Nominatim
 import sqlite3
-import time
 
 # Decorator to ensure user is logged in
 def login_required(f):

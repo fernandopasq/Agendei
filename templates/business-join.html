@@ -1,0 +1,105 @@
+{% extends "layout.html" %}
+
+{% block title %}
+Entrar em uma Equipe
+{% endblock %}
+
+{% block body %}
+<div class="container py-4">
+
+    <!-- Cabeçalho -->
+    <div class="mb-4">
+        <a href="/business/home" class="btn btn-outline-secondary btn-sm mb-3">&larr; Voltar para a Home</a>
+        <h1 class="h3 fw-bold">Juntar-se a uma Equipe</h1>
+        <p class="text-muted">Pesquise pelo nome do estabelecimento onde você deseja prestar serviços e envie uma solicitação.</p>
+    </div>
+
+    <!-- Barra de Pesquisa (Método GET) -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-4">
+            <form action="/business/join" method="get">
+                <label for="q" class="form-label fw-semibold">Nome do Estabelecimento ou Endereço</label>
+                <div class="input-group">
+                    <input 
+                        type="text" 
+                        class="form-control form-control-lg" 
+                        id="q" 
+                        name="q" 
+                        placeholder="Digite o nome, rua ou bairro..." 
+                        value="{{ query }}"
+                        required
+                        autocomplete="off"
+                    >
+                    <button class="btn btn-primary px-4" type="submit">
+                        Pesquisar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Resultados da Busca -->
+    {% if query %}
+        <h2 class="h5 mb-3 fw-bold">Resultados para "{{ query }}"</h2>
+
+        {% if businesses %}
+            <div class="row g-4">
+                {% for b in businesses %}
+                    <div class="col-12 col-md-6 col-lg-4">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-body d-flex flex-column p-4">
+                                <div class="mb-2">
+                                    <span class="badge bg-secondary text-dark border">{{ b.category }}</span>
+                                </div>
+
+                                <h5 class="card-title fw-bold mb-1">{{ b.business_name }}</h5>
+                                
+                                <p class="card-text text-muted small flex-grow-1 mb-3">
+                                    {{ b.street }}, {{ b.number }}<br>
+                                    {{ b.neighborhood }} - {{ b.city }}/{{ b.state }}
+                                </p>
+
+                                <!-- Ação de acordo com o papel e status atual -->
+                                <div class="mt-auto">
+                                    {% if b.is_owner %}
+                                        <button class="btn btn-secondary w-100" disabled>
+                                            Você é o Proprietário
+                                        </button>
+                                    {% elif b.membership_status == 'active' %}
+                                        <button class="btn btn-success w-100" disabled>
+                                            <i class="bi bi-check-circle"></i> Você já é da equipe
+                                        </button>
+                                    {% elif b.membership_status == 'pending' %}
+                                        <button class="btn btn-warning w-100 text-dark" disabled>
+                                            Solicitação Pendente
+                                        </button>
+                                    {% else %}
+                                        <form action="/business/join?q={{ query }}" method="post">
+                                            <input type="hidden" name="business_id" value="{{ b.business_id }}">
+                                            <button type="submit" class="btn btn-outline-primary w-100">
+                                                Solicitar Entrada
+                                            </button>
+                                        </form>
+                                    {% endif %}
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <!-- Estado Vazio nos Resultados -->
+            <div class="card bg-light border-0 py-5 px-3 mb-4 text-center">
+                <div class="card-body">
+                    <h5 class="fw-bold">Nenhum estabelecimento encontrado</h5>
+                    <p class="text-muted col-lg-10 mx-auto mb-0">
+                        Verifique a ortografia do nome ou tente buscar pelo nome da rua/bairro.
+                    </p>
+                </div>
+            </div>
+        {% endif %}
+    {% endif %}
+
+</div>
+{% endblock %}

@@ -1,0 +1,148 @@
+{% extends "layout.html" %}
+
+{% block title %}
+Painel do Prestador - {{ business.business_name }}
+{% endblock %}
+
+{% block body %}
+<div class="container py-4">
+
+    <!-- Cabeçalho / Voltar -->
+    <div class="mb-4">
+        <a href="/business/home" class="btn btn-outline-secondary btn-sm mb-3">&larr; Voltar para a Home</a>
+        <div class="d-flex align-items-center gap-2 mb-1">
+            <span class="badge bg-info bg-opacity-10 text-info fw-semibold">Prestador</span>
+            <span class="badge bg-secondary text-dark border">{{ business.category }}</span>
+        </div>
+        <h1 class="h3 fw-bold mb-1">{{ business.business_name }}</h1>
+        <p class="text-muted small mb-0">
+            {{ business.street }}, {{ business.number }} - {{ business.neighborhood }}, {{ business.city }}/{{
+            business.state }}
+        </p>
+    </div>
+
+    <!-- SEÇÃO 1: Minha Agenda de Atendimentos -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="h5 fw-bold mb-0">Minha Agenda de Atendimentos</h2>
+                <span
+                    class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 fw-medium py-2 px-3">
+                    <i class="bi bi-sort-down me-1"></i> Ordenado por data
+                </span>
+            </div>
+
+            {% if appointments %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Data / Hora</th>
+                            <th>Serviço</th>
+                            <th>Cliente</th>
+                            <th>Status</th>
+                            <th class="text-end">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for app in appointments %}
+                        <tr>
+                            <td class="fw-semibold">{{ app.date }}</td>
+                            <td>{{ app.service_name }}</td>
+                            <td>{{ app.client_name }} {{ app.client_surename }}</td>
+                            <td>
+                                {% if app.status == 'cancelled' %}
+                                <span class="badge bg-danger bg-opacity-10 text-danger fw-semibold">Cancelado</span>
+                                {% elif app.status == 'confirmed' %}
+                                <span class="badge bg-success bg-opacity-10 text-success fw-semibold">Confirmado</span>
+                                {% else %}
+                                <span class="badge bg-warning bg-opacity-10 text-warning fw-semibold">{{ app.status
+                                    }}</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end">
+                                {% if app.status != 'cancelled' %}
+                                <form action="/business/appointment/{{ app.appointment_id }}/cancel" method="post"
+                                    onsubmit="return confirm('Deseja realmente cancelar este agendamento?');"
+                                    class="d-inline">
+                                    <button type="submit" class="btn btn-outline-danger btn-sm">
+                                        Cancelar
+                                    </button>
+                                </form>
+                                {% else %}
+                                <span class="text-muted small">-</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="card bg-light border-0 py-4 text-center">
+                <div class="card-body">
+                    <p class="text-muted mb-0">Nenhum agendamento marcado para você neste estabelecimento até o momento.
+                    </p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- SEÇÃO 2: Catálogo e Gerenciamento de Serviços do Prestador -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="h5 fw-bold mb-0">Serviços Oferecidos no Local</h2>
+                <a href="/business/view/{{ business.business_id }}/services" class="btn btn-outline-primary btn-sm">
+                    Gerenciar Meus Serviços
+                </a>
+            </div>
+
+            {% if services %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Serviço</th>
+                            <th>Descrição</th>
+                            <th>Preço</th>
+                            <th class="text-end">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for s in services %}
+                        <!-- Dentro do loop de serviços em business-provider-view.html -->
+                        <tr>
+                            <td class="fw-bold">{{ s.name }}</td>
+                            <td class="text-muted small">{{ s.description or '-' }}</td>
+                            <td>
+                                <span
+                                    class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2 py-1 fw-semibold">
+                                    R$ {{ "%.2f"|format(s.price) }}
+                                </span>
+                            </td>
+                            <td class="text-end">
+                                {% if s.is_assigned %}
+                                <span class="badge bg-success bg-opacity-10 text-success fw-semibold">
+                                    Atendendo
+                                </span>
+                                {% else %}
+                                <span class="badge bg-secondary bg-opacity-10 text-secondary fw-normal">
+                                    Não Alistado
+                                </span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-muted small mb-0">Nenhum serviço cadastrado pelo proprietário ainda.</p>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,258 @@
+// ==============================================================================
+// 1. PALETA BASE CATPPUCCIN MOCHA (Variáveis Sass locais)
+// ==============================================================================
+$ctp-rosewater: #f5e0dc;
+$ctp-flamingo:  #f2cdcd;
+$ctp-pink:      #f5c2e7;
+$ctp-mauve:     #cba6f7; // Acentuação Violeta/Roxo
+$ctp-red:       #f38ba8; // Danger
+$ctp-maroon:    #eba0ac;
+$ctp-peach:     #fab387; // Warning
+$ctp-yellow:    #f9e2af;
+$ctp-green:     #a6e3a1; // Success
+$ctp-teal:      #94e2d5;
+$ctp-sky:       #89dceb; // Info
+$ctp-sapphire:  #74c7ec;
+$ctp-blue:      #89b4fa; // Primary
+$ctp-lavender:  #b4befe; // Secondary
+
+// Tons Neutros de Fundo e Texto (Escuro -> Claro)
+$ctp-crust:     #11111b; // Fundo super escuro (rodapés, menus profundos)
+$ctp-mantle:    #181825; // Fundo secundário (sidebars, navbars)
+$ctp-base:      #1e1e2e; // Fundo principal da página (body)
+$ctp-surface0:  #313244; // Fundo de Cards, Modais, Inputs
+$ctp-surface1:  #45475a; // Bordas e divisores sutis
+$ctp-surface2:  #585b70; // Bordas em foco / hover
+$ctp-overlay0:  #6c7086; // Textos desativados (disabled) ou secundários sutis
+$ctp-subtext0:  #a6adc8; // Subtítulos e textos de auxílio
+$ctp-text:      #cdd6f4; // Texto principal (alto contraste)
+
+// ==============================================================================
+// 2. CONFIGURAÇÕES GLOBAIS DO BOOTSTRAP
+// ==============================================================================
+// Fundo geral da página e cor padrão do texto
+$body-bg:          $ctp-base;
+$body-color:       $ctp-text;
+
+// Cores fundamentais das classes do Bootstrap (btn-primary, text-danger, etc.)
+$primary:          $ctp-blue;
+$secondary:        $ctp-lavender;
+$success:          $ctp-green;
+$info:             $ctp-sky;
+$warning:          $ctp-peach;
+$danger:           $ctp-red;
+$light:            $ctp-surface0;
+$dark:             $ctp-crust;
+
+// Adicionando os tons exclusivos do Catppuccin ao mapa de cores do Bootstrap
+$theme-colors: (
+  "primary":    $primary,
+  "secondary":  $secondary,
+  "success":    $success,
+  "info":       $info,
+  "warning":    $warning,
+  "danger":     $danger,
+  "light":      $light,
+  "dark":       $dark,
+  "mauve":      $ctp-mauve,     // Gera: btn-mauve, text-mauve, bg-mauve
+  "pink":       $ctp-pink,      // Gera: btn-pink, text-pink, bg-pink
+  "teal":       $ctp-teal,      // Gera: btn-teal, text-teal, bg-teal
+  "rosewater":  $ctp-rosewater  // Gera: btn-rosewater, etc.
+);
+
+// ==============================================================================
+// 3. ADEQUAÇÃO HARMONIOSA DOS COMPONENTES DO BOOTSTRAP
+// ==============================================================================
+
+// Card (Cards de conteúdo)
+$card-bg:                   $ctp-surface0;
+$card-border-color:         $ctp-surface1;
+$card-cap-bg:               $ctp-mantle;
+
+// Formulários e Inputs
+$input-bg:                  $ctp-surface0;
+$input-border-color:        $ctp-surface1;
+$input-color:               $ctp-text;
+$input-focus-bg:            $ctp-surface0;
+$input-focus-border-color:  $ctp-mauve;
+$input-focus-color:         $ctp-text;
+$input-placeholder-color:   $ctp-overlay0;
+
+// Navbars (Barra de Navegação)
+$navbar-dark-bg:            $ctp-mantle;
+$navbar-dark-color:         $ctp-subtext0;
+$navbar-dark-hover-color:   $ctp-mauve;
+$navbar-dark-active-color:  $ctp-mauve;
+
+// Modais e Popups
+$modal-content-bg:          $ctp-surface0;
+$modal-content-border-color:$ctp-surface1;
+$modal-header-border-color: $ctp-surface1;
+$modal-footer-border-color: $ctp-surface1;
+
+// Tabelas
+$table-color:               $ctp-text;
+$table-bg:                  transparent;
+$table-border-color:        $ctp-surface1;
+$table-hover-bg:            $ctp-surface1;
+
+// Dropdowns
+$dropdown-bg:               $ctp-surface0;
+$dropdown-border-color:     $ctp-surface1;
+$dropdown-color:            $ctp-text;
+$dropdown-link-color:       $ctp-text;
+$dropdown-link-hover-bg:    $ctp-surface1;
+$dropdown-link-hover-color: $ctp-mauve;
+
+// List Groups
+$list-group-bg:             $ctp-surface0;
+$list-group-border-color:    $ctp-surface1;
+$list-group-color:          $ctp-text;
+
+// ==============================================================================
+// 4. IMPORTAÇÃO DO BOOTSTRAP
+// ==============================================================================
+@import "bootstrap/bootstrap";
+
+// ==============================================================================
+// 5. ESTILOS ESPECÍFICOS DO AGÊNCIAI
+// ==============================================================================
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.main-content {
+  flex: 1 0 auto;
+  width: 100%;
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+}
+
+.card {
+  --bs-card-bg: #{$ctp-mantle};
+  --bs-card-color: #{$ctp-text};
+  --bs-card-border-color: #{$ctp-surface1};
+  --bs-card-cap-bg: #{$ctp-crust};
+}
+
+.list-group {
+  --bs-list-group-bg: transparent;
+  --bs-list-group-color: #{$ctp-text};
+  --bs-list-group-border-color: #{$ctp-surface1};
+}
+
+.form-control {
+  background-color: $ctp-mantle;
+  border-color: $ctp-surface1;
+  color: $ctp-text;
+
+  &:focus {
+    background-color: $ctp-mantle;
+    border-color: $ctp-sapphire;
+    color: $ctp-text;
+    box-shadow: 0 0 0 0.25rem rgba($ctp-sapphire, 0.25);
+  }
+
+  &::placeholder {
+    color: $ctp-subtext0;
+  }
+}
+
+.btn-primary {
+  --bs-btn-bg: #{$ctp-blue};
+  --bs-btn-border-color: #{$ctp-blue};
+  --bs-btn-color: #{$ctp-base};
+  --bs-btn-hover-bg: #{$ctp-sapphire};
+  --bs-btn-hover-border-color: #{$ctp-sapphire};
+  --bs-btn-hover-color: #{$ctp-base};
+  --bs-btn-active-bg: #{$ctp-sapphire};
+  --bs-btn-active-border-color: #{$ctp-sapphire};
+  --bs-btn-active-color: #{$ctp-base};
+  font-weight: 500;
+}
+
+.btn:active {
+  transform: scale(0.98);
+}
+
+.custom-navbar {
+  background-color: $ctp-mantle;
+  box-shadow: 0 4px 12px rgba($ctp-crust, 0.5);
+  border-bottom: 1px solid $ctp-surface1;
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+
+  .navbar-brand {
+    color: $ctp-lavender;
+    font-weight: 700;
+    font-size: 1.35rem;
+    transition: color 0.2s ease;
+
+    &:hover {
+      color: $ctp-sapphire;
+    }
+  }
+
+  .nav-link {
+    color: $ctp-subtext0;
+    font-weight: 500;
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+    transition: color 0.2s ease;
+
+    &:hover,
+    &.active {
+      color: $ctp-sapphire;
+    }
+
+    &.active {
+      font-weight: 600;
+      border-bottom: 2px solid $ctp-sapphire;
+    }
+  }
+
+  .navbar-toggler {
+    border-color: $ctp-surface1;
+  }
+}
+
+@media (max-width: 991.98px) {
+  .custom-navbar {
+    .navbar-nav {
+      padding-top: 1rem;
+    }
+
+    .nav-link.active {
+      border-bottom: none;
+      border-left: 3px solid $ctp-sapphire;
+      padding-left: 0.75rem !important;
+    }
+  }
+}
+
+.apology-icon {
+  max-width: 300px;
+  margin-left: auto;
+  margin-right: auto;
+
+  svg {
+    display: block;
+    width: 100%;
+    height: auto;
+
+    path,
+    polygon,
+    circle,
+    rect {
+      fill: $ctp-lavender;
+    }
+  }
+}
+
+.custom-footer {
+  background-color: $ctp-mantle;
+  color: $ctp-subtext0;
+  border-top: 1px solid $ctp-surface1;
+}
