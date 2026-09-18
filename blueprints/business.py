@@ -40,7 +40,7 @@ def business_landing():
     return render_template("business.html")
 
 
-# Home do Parceiro (Acessada via /business/home)
+# Página inicial do parceiro (acessada via /business/home)
 @business_bp.route("/home")
 def home():
     user_id = session.get("user_id")
@@ -77,7 +77,7 @@ def home():
     return render_template("business-home.html", user_name=user_name, businesses=businesses)
 
 
-# Login do Parceiro (Acessado via /business/login)
+# Login do parceiro (acessado via /business/login)
 @business_bp.route("/login", methods=["GET", "POST"])
 def login_business():
     session.clear()
@@ -773,7 +773,7 @@ def delete_service(business_id, service_id):
     flash("Serviço removido com sucesso.", "info")
     return redirect(url_for("business.manage_business", business_id=business_id))
 
-# Formulário/Ação de Seleção de Serviços do Prestador
+# Formulário e ação de seleção de serviços do prestador
 @business_bp.route("/view/<int:business_id>/services", methods=["GET", "POST"])
 def manage_provider_services(business_id):
     user_id = session.get("user_id")
@@ -819,7 +819,7 @@ def manage_provider_services(business_id):
         
         return redirect(url_for("business.provider_view", business_id=business_id))
 
-    # GET: Verifica se o usuário logado é o proprietário do estabelecimento
+    # GET: verifica se o usuário autenticado é o proprietário do estabelecimento
     cursor.execute("SELECT owner_id FROM business WHERE business_id = ?", (business_id,))
     b_info = cursor.fetchone()
     is_owner = (b_info and b_info["owner_id"] == user_id)

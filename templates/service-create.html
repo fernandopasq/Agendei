@@ -7,12 +7,12 @@ Criar Serviço - {{ business.business_name }}
 {% block body %}
 <div class="container py-4" style="max-width: 640px;">
 
-    <!-- Link para Voltar -->
+    <!-- Link de retorno -->
     <a href="/business/manage/{{ business.business_id }}" class="btn btn-outline-secondary btn-sm mb-4">
         &larr; Voltar para Gerenciamento
     </a>
 
-    <!-- Card Principal do Formulário -->
+    <!-- Cartão principal do formulário -->
     <div class="card border-0 shadow-sm">
         <div class="card-body p-4 p-md-5">
             
@@ -27,7 +27,7 @@ Criar Serviço - {{ business.business_name }}
                 </p>
             </div>
 
-            <!-- Formulário de Criação -->
+            <!-- Formulário de criação -->
             <form action="/business/manage/{{ business.business_id }}/service/new" method="post">
                 
                 <!-- Nome do Serviço -->

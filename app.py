@@ -4,27 +4,27 @@ from flask import Flask, flash, redirect, render_template, request, session, url
 from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
 
-# Import helpers
+# Importa funções auxiliares
 from helpers import apology, brl, category_slug, close_db, format_phone, get_db, normalize_phone
 
-# Import Blueprints
+# Importa os Blueprints
 from blueprints.client import client_bp
 from blueprints.business import business_bp
 
-# Configure application
+# Configura a aplicação
 app = Flask(__name__)
 
-# Custom filter
+# Filtros personalizados
 app.jinja_env.filters["brl"] = brl  # -> R$
 app.jinja_env.filters["category_slug"] = category_slug
 app.jinja_env.filters["phone"] = format_phone
 
-# Configure session to use filesystem
+# Configura a sessão para usar o sistema de arquivos
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
-# Register teardown
+# Registra o encerramento do contexto
 app.teardown_appcontext(close_db)
 
 # Registrar os Blueprints na aplicação
@@ -106,7 +106,7 @@ def after_request(response):
 
 
 # ====================================
-#   GENERAL ERRORS RETURNS
+#   RETORNOS DE ERROS GERAIS
 # ====================================
 
 @app.errorhandler(404)

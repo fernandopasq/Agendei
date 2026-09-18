@@ -6,7 +6,7 @@ from flask import render_template, redirect, session, g
 from functools import wraps
 import sqlite3
 
-# Decorator to ensure user is logged in
+# Decorador que garante que o usuário está autenticado
 def login_required(f):
     """Garante que o usuário está logado no sistema"""
     @wraps(f)
@@ -17,19 +17,19 @@ def login_required(f):
 
     return decorated_function
 
-# Apology function to render error messages
+# Função de erro que renderiza mensagens para o usuário
 def apology(message, code=400):
-    """Render message as an apology to user."""
+    """Renderiza uma mensagem de erro para o usuário."""
     return render_template("apology.html", message=message, code=code), code
 
 
 def brl(value):
-    """Format value as BRL."""
+    """Formata um valor em reais."""
     return f"R${value:,.2f}"
 
 
 def category_slug(category):
-    """Convert a category label into a stable CSS-friendly slug."""
+    """Converte o nome de uma categoria em um identificador CSS estável."""
     if not category:
         return "outros"
 
@@ -39,7 +39,7 @@ def category_slug(category):
 
 
 def format_phone(phone):
-    """Format a Brazilian phone number stored as digits."""
+    """Formata um telefone brasileiro armazenado como dígitos."""
     digits = re.sub(r"\D", "", phone or "")
     if len(digits) == 11:
         return f"({digits[:2]}) {digits[2:7]}-{digits[7:]}"
@@ -49,7 +49,7 @@ def format_phone(phone):
 
 
 def normalize_phone(ddd, number):
-    """Return a Brazilian phone number as digits after basic validation."""
+    """Retorna um telefone brasileiro em dígitos após validação básica."""
     ddd_digits = re.sub(r"\D", "", ddd or "")
     number_digits = re.sub(r"\D", "", number or "")
     if len(ddd_digits) != 2 or len(number_digits) not in (8, 9):
@@ -57,9 +57,9 @@ def normalize_phone(ddd, number):
     return ddd_digits + number_digits
 
 
-# ---- Database Related Helpers -----
+# ---- Funções auxiliares do banco de dados -----
 def get_db():
-    """Get a database connection (one per request)"""
+    """Obtém uma conexão com o banco por requisição."""
     if "db" not in g:
         g.db = sqlite3.connect("agendei.db")
         g.db.row_factory = sqlite3.Row
@@ -70,7 +70,7 @@ def get_db():
 
 
 def _ensure_booking_columns(db):
-    """Add booking fields to databases created with the original schema."""
+    """Adiciona campos de agendamento a bancos criados com o schema original."""
     cursor = db.cursor()
 
     service_columns = {row[1] for row in cursor.execute("PRAGMA table_info(services)")}
@@ -91,7 +91,7 @@ def _ensure_booking_columns(db):
 
 
 def _ensure_contact_columns(db):
-    """Add contact fields and populate legacy rows with fictional numbers."""
+    """Adiciona campos de contato e preenche registros antigos com números fictícios."""
     cursor = db.cursor()
 
     user_columns = {row[1] for row in cursor.execute("PRAGMA table_info(users)")}
@@ -119,7 +119,7 @@ def _ensure_contact_columns(db):
 
 
 def _mark_past_appointments_completed(db):
-    """Mark confirmed appointments whose date and time have already passed."""
+    """Marca como concluídos os agendamentos confirmados cujo horário já passou."""
     cursor = db.cursor()
     now = datetime.now()
     cursor.execute("""

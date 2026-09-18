@@ -147,7 +147,7 @@ def index():
         locations=locations
     )
 
-# Login de Usuário
+# Login de usuário
 @client_bp.route("/login", methods=["GET", "POST"])
 def login_user():
     session.clear()
@@ -224,7 +224,7 @@ def register_user():
         return render_template("register.html")
 
 
-# Logout
+# Encerramento da sessão
 @client_bp.route("/logout")
 def logout():
     session.clear()
@@ -232,10 +232,10 @@ def logout():
     return redirect("/")
 
 ################################
-# Appointment Routes
+    # Rotas de agendamento
 ################################
 
-# Exemplo de rotas dentro do client_bp
+# Rotas do client_bp
 @client_bp.route("/appointment/new/<int:business_id>")
 def new_appointment(business_id):
     conn = get_db()
@@ -307,7 +307,7 @@ def my_appointments():
 @client_bp.route("/appointment/<int:appointment_id>/cancel", methods=["POST"])
 @login_required
 def cancel_client_appointment(appointment_id):
-    """Cancela somente um agendamento pertencente ao cliente logado."""
+    """Cancela somente um agendamento pertencente ao cliente autenticado."""
     conn = get_db()
     cursor = conn.cursor()
     cursor.execute("""
@@ -351,7 +351,7 @@ def get_service_staff(service_id):
     staff_members = cursor.fetchall()
     
     # Se o serviço ainda não tiver vínculos, oferece todos os prestadores ativos
-    # do estabelecimento para que o cliente ainda consiga prosseguir.
+    # do estabelecimento para que o cliente consiga prosseguir.
     if not staff_members:
         cursor.execute("""
             SELECT DISTINCT
@@ -373,7 +373,7 @@ def get_service_staff(service_id):
 
 @client_bp.route("/api/availability")
 def get_availability():
-    """Retorna a lista de horários livres em um determinado dia para um prestador ou 'qualquer'."""
+    """Retorna horários livres para um prestador específico ou qualquer prestador."""
     business_id = request.args.get("business_id", type=int)
     service_id = request.args.get("service_id", type=int)
     staff_id = request.args.get("staff_id", default="any")  # "any" ou int
@@ -404,7 +404,7 @@ def get_availability():
         return jsonify({"error": "Serviço não encontrado"}), 404
     duration = service["duration_minutes"] or 30
 
-    # 2. Buscar prestadores elegíveis
+    # 2. Busca prestadores elegíveis
     if staff_id != "any":
         staff_ids = [int(staff_id)]
     else:
@@ -428,13 +428,12 @@ def get_availability():
             """, (business_id,))
             staff_ids = [r["user_id"] for r in cursor.fetchall()]
 
-    # 3. Gerar grade de horários (exemplo: 08:00 às 18:00 de 30 em 30 min)
-    # Você pode personalizar para buscar a jornada de trabalho cadastrada do prestador/estabelecimento
+    # 3. Gera a grade de horários das 08:00 às 18:00 em intervalos de 30 minutos.
     slots = []
     start_time = datetime.strptime(f"{date_str} 08:00", "%Y-%m-%d %H:%M")
     end_time = datetime.strptime(f"{date_str} 18:00", "%Y-%m-%d %H:%M")
 
-    # Buscar agendamentos já existentes na data para filtrar conflitos
+    # Busca agendamentos existentes na data para filtrar conflitos.
     cursor.execute("""
                 SELECT a.provider_id, a.appointment_time, a.duration_minutes
                 FROM appointment a
@@ -496,7 +495,7 @@ def get_availability():
 
 @client_bp.route("/appointment/create", methods=["POST"])
 def create_appointment():
-    """Processa a reserva e realiza o sorteio caso 'qualquer' prestador tenha sido selecionado."""
+    """Processa a reserva e sorteia um prestador quando qualquer um foi selecionado."""
     if "user_id" not in session:
         flash("Você precisa estar conectado para agendar.", "warning")
         return redirect(url_for("client.login"))
@@ -534,7 +533,7 @@ def create_appointment():
         return apology("Serviço não encontrado.", 404)
     duration = service["duration_minutes"] or 30
 
-    # Definição do prestador (Sorteio se for 'any')
+    # Define o prestador, sorteando quando a opção for qualquer um.
     if staff_id_raw == "any":
         available_staff_str = request.form.get("available_staff_list", "")
         if available_staff_str:
@@ -546,12 +545,12 @@ def create_appointment():
             flash("Desculpe, o horário selecionado não está mais disponível.", "danger")
             return redirect(url_for("client.new_appointment", business_id=business_id))
 
-        # Sortear aleatoriamente entre os prestadores livres para o horário
+        # Sorteia entre os prestadores livres para o horário.
         final_staff_id = random.choice(candidate_ids)
     else:
         final_staff_id = int(staff_id_raw)
 
-    # Inserir no banco de dados
+    # Insere o agendamento no banco de dados.
     cursor.execute("""
         INSERT INTO appointment
             (user_id, provider_id, service_id, date, appointment_time, duration_minutes, status)

@@ -5,16 +5,16 @@ $ctp-rosewater: #f5e0dc;
 $ctp-flamingo:  #f2cdcd;
 $ctp-pink:      #f5c2e7;
 $ctp-mauve:     #cba6f7; // Acentuação Violeta/Roxo
-$ctp-red:       #f38ba8; // Danger
+$ctp-red:       #f38ba8; // Perigo
 $ctp-maroon:    #eba0ac;
-$ctp-peach:     #fab387; // Warning
+$ctp-peach:     #fab387; // Aviso
 $ctp-yellow:    #f9e2af;
-$ctp-green:     #a6e3a1; // Success
+$ctp-green:     #a6e3a1; // Sucesso
 $ctp-teal:      #94e2d5;
-$ctp-sky:       #89dceb; // Info
+$ctp-sky:       #89dceb; // Informação
 $ctp-sapphire:  #74c7ec;
-$ctp-blue:      #89b4fa; // Primary
-$ctp-lavender:  #b4befe; // Secondary
+$ctp-blue:      #89b4fa; // Primária
+$ctp-lavender:  #b4befe; // Secundária
 
 // Tons Neutros de Fundo e Texto (Escuro -> Claro)
 $ctp-crust:     #11111b; // Fundo super escuro (rodapés, menus profundos)
@@ -23,7 +23,7 @@ $ctp-base:      #1e1e2e; // Fundo principal da página (body)
 $ctp-surface0:  #313244; // Fundo de Cards, Modais, Inputs
 $ctp-surface1:  #45475a; // Bordas e divisores sutis
 $ctp-surface2:  #585b70; // Bordas em foco / hover
-$ctp-overlay0:  #6c7086; // Textos desativados (disabled) ou secundários sutis
+$ctp-overlay0:  #6c7086; // Textos desativados ou secundários sutis
 $ctp-subtext0:  #a6adc8; // Subtítulos e textos de auxílio
 $ctp-text:      #cdd6f4; // Texto principal (alto contraste)
 
@@ -34,7 +34,7 @@ $ctp-text:      #cdd6f4; // Texto principal (alto contraste)
 $body-bg:          $ctp-base;
 $body-color:       $ctp-text;
 
-// Cores fundamentais das classes do Bootstrap (btn-primary, text-danger, etc.)
+// Cores fundamentais das classes do Bootstrap (btn-primary, text-danger etc.)
 $primary:          $ctp-blue;
 $secondary:        $ctp-lavender;
 $success:          $ctp-green;
@@ -64,12 +64,12 @@ $theme-colors: (
 // 3. ADEQUAÇÃO HARMONIOSA DOS COMPONENTES DO BOOTSTRAP
 // ==============================================================================
 
-// Card (Cards de conteúdo)
+// Cards de conteúdo
 $card-bg:                   $ctp-surface0;
 $card-border-color:         $ctp-surface1;
 $card-cap-bg:               $ctp-mantle;
 
-// Formulários e Inputs
+// Formulários e campos
 $input-bg:                  $ctp-surface0;
 $input-border-color:        $ctp-surface1;
 $input-color:               $ctp-text;
@@ -78,13 +78,13 @@ $input-focus-border-color:  $ctp-mauve;
 $input-focus-color:         $ctp-text;
 $input-placeholder-color:   $ctp-overlay0;
 
-// Navbars (Barra de Navegação)
+// Barras de navegação
 $navbar-dark-bg:            $ctp-mantle;
 $navbar-dark-color:         $ctp-subtext0;
 $navbar-dark-hover-color:   $ctp-mauve;
 $navbar-dark-active-color:  $ctp-mauve;
 
-// Modais e Popups
+// Modais e janelas auxiliares
 $modal-content-bg:          $ctp-surface0;
 $modal-content-border-color:$ctp-surface1;
 $modal-header-border-color: $ctp-surface1;
@@ -96,7 +96,7 @@ $table-bg:                  transparent;
 $table-border-color:        $ctp-surface1;
 $table-hover-bg:            $ctp-surface1;
 
-// Dropdowns
+// Menus suspensos
 $dropdown-bg:               $ctp-surface0;
 $dropdown-border-color:     $ctp-surface1;
 $dropdown-color:            $ctp-text;
@@ -104,7 +104,7 @@ $dropdown-link-color:       $ctp-text;
 $dropdown-link-hover-bg:    $ctp-surface1;
 $dropdown-link-hover-color: $ctp-mauve;
 
-// List Groups
+// Grupos de listas
 $list-group-bg:             $ctp-surface0;
 $list-group-border-color:    $ctp-surface1;
 $list-group-color:          $ctp-text;
@@ -261,9 +261,9 @@ body {
 // 6. COMPONENTE: BADGE DE CATEGORIA DINÂMICA
 // ==============================================================================
 
-// Estilo Base do Badge
+// Estilo base da etiqueta
 .badge-category {
-  // Cor Padrão / Fallback (Teal)
+  // Cor padrão (azul-petróleo)
   --cat-color: #{$ctp-teal};
 
   background-color: color-mix(in srgb, var(--cat-color) 15%, transparent);
