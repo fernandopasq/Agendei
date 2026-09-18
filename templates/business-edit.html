@@ -1,0 +1,85 @@
+{% extends "layout.html" %}
+
+{% block title %}Editar Estabelecimento - {{ business.business_name }}{% endblock %}
+
+{% block body %}
+<div class="container py-4" style="max-width: 760px;">
+    <a href="/business/manage/{{ business.business_id }}" class="btn btn-outline-secondary btn-sm mb-4">&larr; Voltar para Gerenciamento</a>
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-4 p-md-5">
+            <h1 class="h4 fw-bold mb-4">Editar Estabelecimento</h1>
+            <form method="post">
+                <div class="mb-3">
+                    <label for="business_name" class="form-label">Nome do Estabelecimento*</label>
+                    <input class="form-control" id="business_name" name="business_name" value="{{ business.business_name }}" required>
+                </div>
+                <div class="mb-3">
+                    <label for="description" class="form-label">Descrição</label>
+                    <textarea class="form-control" id="description" name="description" rows="3">{{ business.description or '' }}</textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="category" class="form-label">Categoria*</label>
+                    <select class="form-select" id="category" name="category" required>
+                        {% for category in ['Beleza e Estética', 'Saúde e Bem-Estar', 'Esportes e Fitness', 'Serviços Automotivos', 'Pets', 'Educação e Consultoria', 'Eventos e Fotografia', 'Serviços Domésticos', 'Outros'] %}
+                            <option value="{{ category }}" {% if category == business.category %}selected{% endif %}>{{ category }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label for="phone_number" class="form-label">Telefone*</label>
+                    <div class="input-group">
+                        <select class="form-select" name="phone_ddd" required style="max-width: 110px;">
+                            {% for ddd in ['11','12','13','14','15','16','17','18','19','21','22','24','27','28','31','32','33','34','35','37','38','41','42','43','44','45','46','47','48','49','51','53','54','55','61','62','63','64','65','66','67','68','69','71','73','74','75','77','79','81','82','83','84','85','86','87','88','89','91','92','93','94','95','96','97','98','99'] %}
+                                <option value="{{ ddd }}" {% if business.phone[:2] == ddd %}selected{% endif %}>({{ ddd }})</option>
+                            {% endfor %}
+                        </select>
+                        <input class="form-control" id="phone_number" name="phone_number" value="{{ business.phone[2:] }}" pattern="[0-9]{4,5}-?[0-9]{4}" required>
+                    </div>
+                </div>
+
+                <h2 class="h6 fw-bold border-top pt-4 mb-3">Endereço</h2>
+                <div class="mb-3">
+                    <label for="cep" class="form-label">CEP</label>
+                    <input class="form-control" id="cep" name="cep" value="{{ business.cep or '' }}" pattern="[0-9]{5}-?[0-9]{3}">
+                </div>
+                <div class="mb-3">
+                    <label for="street" class="form-label">Logradouro*</label>
+                    <input class="form-control" id="street" name="street" value="{{ business.street }}" required>
+                </div>
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label for="number" class="form-label">Número*</label>
+                        <input class="form-control" id="number" name="number" value="{{ business.number }}" required>
+                    </div>
+                    <div class="col-md-8 mb-3">
+                        <label for="complement" class="form-label">Complemento</label>
+                        <input class="form-control" id="complement" name="complement" value="{{ business.complement or '' }}">
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="neighborhood" class="form-label">Bairro*</label>
+                    <input class="form-control" id="neighborhood" name="neighborhood" value="{{ business.neighborhood }}" required>
+                </div>
+                <div class="row">
+                    <div class="col-md-8 mb-3">
+                        <label for="city" class="form-label">Cidade*</label>
+                        <input class="form-control" id="city" name="city" value="{{ business.city }}" required>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="state" class="form-label">Estado*</label>
+                        <select class="form-select" id="state" name="state" required>
+                            {% for state in ['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO'] %}
+                                <option value="{{ state }}" {% if state == business.state %}selected{% endif %}>{{ state }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-end gap-2 mt-3">
+                    <a href="/business/manage/{{ business.business_id }}" class="btn btn-outline-secondary">Cancelar</a>
+                    <button class="btn btn-primary" type="submit">Salvar Alterações</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

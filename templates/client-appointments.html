@@ -30,11 +30,11 @@
                                         <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
                                             <h2 class="h5 fw-bold mb-0">{{ appointment.service_name }}</h2>
                                             {% if appointment.status == 'cancelled' %}
-                                                <span class="badge bg-danger-subtle text-danger">Cancelado</span>
+                                                <span class="badge bg-danger bg-opacity-10 text-danger fw-semibold">Cancelado</span>
                                             {% elif appointment.date < today %}
-                                                <span class="badge bg-secondary-subtle text-secondary">Concluído</span>
+                                                <span class="badge bg-secondary bg-opacity-10 text-secondary fw-semibold">Concluído</span>
                                             {% else %}
-                                                <span class="badge bg-success-subtle text-success">Confirmado</span>
+                                                <span class="badge bg-success bg-opacity-10 text-success fw-semibold">Confirmado</span>
                                             {% endif %}
                                         </div>
                                         <p class="text-muted mb-2">

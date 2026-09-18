@@ -406,6 +406,64 @@ def manage_business(business_id):
     )
 
 
+@business_bp.route("/manage/<int:business_id>/edit", methods=["GET", "POST"])
+def edit_business(business_id):
+    user_id = session.get("user_id")
+    conn = get_db()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "SELECT * FROM business WHERE business_id = ? AND owner_id = ?",
+        (business_id, user_id)
+    )
+    business = cursor.fetchone()
+    if not business:
+        conn.close()
+        return apology("Estabelecimento não encontrado ou acesso não autorizado.", 403)
+
+    if request.method == "POST":
+        business_name = request.form.get("business_name", "").strip()
+        description = request.form.get("description", "").strip()
+        category = request.form.get("category", "").strip()
+        phone = normalize_phone(request.form.get("phone_ddd"), request.form.get("phone_number"))
+        cep = request.form.get("cep", "").replace("-", "").strip() or None
+        street = normalize_street(request.form.get("street"))
+        number = request.form.get("number", "").strip()
+        complement = request.form.get("complement", "").strip()
+        neighborhood = request.form.get("neighborhood", "").strip()
+        city = request.form.get("city", "").strip()
+        state = request.form.get("state", "").strip()
+
+        cursor.execute(
+            "SELECT 1 FROM business WHERE phone = ? AND business_id != ?",
+            (phone, business_id)
+        )
+        phone_taken = cursor.fetchone()
+
+        if not all([business_name, category, phone, street, number, neighborhood, city, state]):
+            flash("Preencha todos os campos obrigatórios do estabelecimento.", "danger")
+        elif phone_taken:
+            flash("Este número de telefone já está cadastrado em outro estabelecimento.", "danger")
+        else:
+            cursor.execute("""
+                UPDATE business
+                SET business_name = ?, description = ?, category = ?, phone = ?,
+                    cep = ?, street = ?, number = ?, complement = ?,
+                    neighborhood = ?, city = ?, state = ?
+                WHERE business_id = ? AND owner_id = ?
+            """, (
+                business_name, description, category, phone, cep, street, number,
+                complement, neighborhood, city, state, business_id, user_id
+            ))
+            conn.commit()
+            conn.close()
+            flash("Estabelecimento atualizado com sucesso.", "success")
+            return redirect(url_for("business.manage_business", business_id=business_id))
+
+    conn.close()
+    return render_template("business-edit.html", business=business)
+
+
 # 2. ROTA DE VISUALIZAÇÃO / PAINEL DO PRESTADOR
 @business_bp.route("/view/<int:business_id>")
 def provider_view(business_id):
@@ -605,6 +663,53 @@ def create_service_form(business_id):
         return apology("Estabelecimento não encontrado ou acesso não autorizado.", 403)
 
     return render_template("service-create.html", business=business)
+
+
+@business_bp.route("/manage/<int:business_id>/service/<int:service_id>/edit", methods=["GET", "POST"])
+def edit_service(business_id, service_id):
+    user_id = session.get("user_id")
+    conn = get_db()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT s.*, b.business_name, b.category
+        FROM services s
+        JOIN business b ON b.business_id = s.business_id
+        WHERE s.service_id = ? AND s.business_id = ? AND b.owner_id = ?
+    """, (service_id, business_id, user_id))
+    service = cursor.fetchone()
+    if not service:
+        conn.close()
+        return apology("Serviço não encontrado ou acesso não autorizado.", 403)
+
+    if request.method == "POST":
+        name = request.form.get("name", "").strip()
+        description = request.form.get("description", "").strip()
+        price_raw = request.form.get("price", "").strip()
+        duration_minutes = request.form.get("duration_minutes", type=int)
+
+        try:
+            price = float(price_raw)
+        except (TypeError, ValueError):
+            price = None
+
+        if not name or price is None or price < 0 or not duration_minutes:
+            flash("Informe nome, preço e duração válidos.", "danger")
+        elif duration_minutes < 5 or duration_minutes > 1440:
+            flash("A duração deve estar entre 5 e 1440 minutos.", "danger")
+        else:
+            cursor.execute("""
+                UPDATE services
+                SET name = ?, description = ?, price = ?, duration_minutes = ?
+                WHERE service_id = ? AND business_id = ?
+            """, (name, description, price, duration_minutes, service_id, business_id))
+            conn.commit()
+            conn.close()
+            flash("Serviço atualizado com sucesso.", "success")
+            return redirect(url_for("business.manage_business", business_id=business_id))
+
+    conn.close()
+    return render_template("service-edit.html", service=service, business_id=business_id)
 
 
 # Criar novo serviço

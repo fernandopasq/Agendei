@@ -1,0 +1,45 @@
+{% extends "layout.html" %}
+
+{% block title %}Editar Serviço - {{ service.business_name }}{% endblock %}
+
+{% block body %}
+<div class="container py-4" style="max-width: 640px;">
+    <a href="/business/manage/{{ business_id }}" class="btn btn-outline-secondary btn-sm mb-4">&larr; Voltar para Gerenciamento</a>
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-4 p-md-5">
+            <span class="badge badge-category mb-2" data-category="{{ service.category | category_slug }}">{{ service.category }}</span>
+            <h1 class="h4 fw-bold mb-1">Editar Serviço</h1>
+            <p class="text-muted small mb-4">Atualize as informações de <strong>{{ service.name }}</strong>.</p>
+
+            <form method="post">
+                <div class="mb-3">
+                    <label for="name" class="form-label fw-semibold">Nome do Serviço*</label>
+                    <input class="form-control form-control-lg" id="name" name="name" value="{{ service.name }}" required autofocus>
+                </div>
+                <div class="mb-3">
+                    <label for="description" class="form-label fw-semibold">Descrição</label>
+                    <textarea class="form-control" id="description" name="description" rows="3">{{ service.description or '' }}</textarea>
+                </div>
+                <div class="mb-4">
+                    <label for="price" class="form-label fw-semibold">Preço (R$)*</label>
+                    <div class="input-group input-group-lg">
+                        <span class="input-group-text bg-light text-muted fw-bold">R$</span>
+                        <input class="form-control" id="price" name="price" type="number" step="0.01" min="0" value="{{ service.price }}" required>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label for="duration_minutes" class="form-label fw-semibold">Duração do Serviço*</label>
+                    <div class="input-group input-group-lg">
+                        <input class="form-control" id="duration_minutes" name="duration_minutes" type="number" min="5" max="1440" step="5" value="{{ service.duration_minutes or 30 }}" required>
+                        <span class="input-group-text bg-light text-muted">minutos</span>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-end gap-2">
+                    <a href="/business/manage/{{ business_id }}" class="btn btn-outline-secondary">Cancelar</a>
+                    <button class="btn btn-primary" type="submit">Salvar Alterações</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
