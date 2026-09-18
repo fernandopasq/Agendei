@@ -1,0 +1,6 @@
+# Bootstrap is third-party source imported by static/scss/main.scss.
+static/scss/bootstrap/** linguist-vendored
+
+# Compiled assets are generated from the SCSS sources.
+static/css/*.css linguist-generated
+static/css/*.css.map linguist-generated
