@@ -88,7 +88,39 @@ Access control is managed via session attributes:
 
 ---
 
-## 5. Project Structure
+## 5. Design Decisions
+
+### Blueprint separation and access boundaries
+
+The application is divided into `client_bp` and `business_bp` so that each area has a clear ownership boundary. This is more than an organizational split: each Blueprint has request guards that enforce the session role before protected routes are reached. Clients and partners therefore use separate workflows, routes, and dashboards, while the shared profile functionality remains intentionally available to both roles.
+
+### Unified Business account model
+
+The Business area was designed around one unified partner account instead of separate owner and provider account types. Any Business user can create a new establishment or request membership in an existing team. The account's broad role only identifies that it is a partner account; the effective role is determined per establishment through the relationship between `business.owner_id` and `business_providers`, whose role and status record ownership, provider membership, and pending requests.
+
+This model keeps the account flexible while preserving explicit authorization. A user can own one establishment and provide services in another, without needing duplicate accounts or a manual role migration. The request workflow is necessary because joining a team is not an immediate permission grant: a provider submits a request, the establishment owner reviews it, and only an accepted active membership enables team features and service assignments.
+
+The same distinction shapes the interface. The Business home menu offers both establishment creation and the option to find or request entry into a team. Establishment cards identify whether the current user is the owner or an active provider, so each card exposes the appropriate actions. Owners reach a management dashboard with services, staff, pending requests, and appointments; providers receive a dashboard focused on their assigned services and schedule. This role-aware presentation keeps one account experience without hiding the different responsibilities that exist inside each establishment.
+
+### Centralized visual language with SCSS
+
+SCSS concentrates most of the project's custom visual rules in one place instead of scattering theme values throughout individual templates. This makes the Catppuccin palette, Bootstrap overrides, spacing, surfaces, and responsive behavior easier to maintain consistently. Templates remain focused on structure and content, while the compiled CSS carries the visual system.
+
+### Progressive appointment registration with JavaScript
+
+The appointment page uses JavaScript and asynchronous `fetch` requests to progressively load professionals and available time slots after the client selects a service, professional, and date. This creates a smoother interaction and avoids creating a separate HTML page for every intermediate state. The server remains responsible for recalculating availability and validating the final booking, so the client-side interaction does not replace backend validation.
+
+### Small, focused helper functions
+
+Shared behavior is kept in `helpers.py` through focused functions such as `login_required` for access checks, `apology` for consistent errors, `get_db` and `close_db` for database lifecycle management, `normalize_phone` and `normalize_street` for input normalization, and formatting helpers for currency, phone numbers, and category slugs. Keeping these responsibilities in small helpers reduces duplication in routes and gives repeated behavior one place to evolve.
+
+### Hierarchical location filters instead of coordinates
+
+Business locations store structured fields such as state, city, neighborhood, and street. The home page uses SQL queries and dependent filters to narrow results through that hierarchy. This was a deliberate scope decision: coordinate-based search would require geocoding, map data, and external APIs, adding operational complexity and making open distribution harder. For a project of this size, SQL filters are sufficient to demonstrate location discovery clearly without introducing infrastructure that is not essential to the core scheduling problem.
+
+---
+
+## 6. Project Structure
 
 <details>
   <summary><b>View Directory Tree & File Details</b> (Click to expand)</summary>
@@ -144,7 +176,7 @@ project/
 
 ---
 
-## 6. Database & Migrations
+## 7. Database & Migrations
 
 <details>
   <summary><b>Schema & Availability Logic</b> (Click to expand)</summary>
@@ -182,7 +214,7 @@ Validation is enforced both on the client side (UI filtering) and re-checked on 
 
 ---
 
-## 7. Setup & Installation
+## 8. Setup & Installation
 
 ### Prerequisites
 
@@ -218,6 +250,6 @@ Validation is enforced both on the client side (UI filtering) and re-checked on 
 
 ---
 
-## 8. License
+## 9. License
 
 Distributed under the MIT License. See `LICENSE` for more information.

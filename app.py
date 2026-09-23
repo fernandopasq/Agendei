@@ -4,6 +4,7 @@ from flask import Flask, flash, redirect, render_template, request, session, url
 from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
 
+from constants import BUSINESS_DDDS
 # Importa funções auxiliares
 from helpers import apology, brl, category_slug, close_db, format_phone, get_db, normalize_phone
 
@@ -30,16 +31,6 @@ app.teardown_appcontext(close_db)
 # Registrar os Blueprints na aplicação
 app.register_blueprint(client_bp)
 app.register_blueprint(business_bp)
-
-
-DDD_CODES = [
-    "11", "12", "13", "14", "15", "16", "17", "18", "19", "21", "22", "24",
-    "27", "28", "31", "32", "33", "34", "35", "37", "38", "41", "42", "43",
-    "44", "45", "46", "47", "48", "49", "51", "53", "54", "55", "61", "62",
-    "63", "64", "65", "66", "67", "68", "69", "71", "73", "74", "75", "77",
-    "79", "81", "82", "83", "84", "85", "86", "87", "88", "89", "91", "92",
-    "93", "94", "95", "96", "97", "98", "99"
-]
 
 
 @app.route("/profile", methods=["GET", "POST"])
@@ -92,7 +83,7 @@ def profile():
     cursor.execute("SELECT * FROM users WHERE user_id = ?", (user_id,))
     user = cursor.fetchone()
     conn.close()
-    return render_template("profile.html", user=user, ddd_codes=DDD_CODES)
+    return render_template("profile.html", user=user, ddd_codes=BUSINESS_DDDS)
 
 
 # Disables browser caching
@@ -125,3 +116,11 @@ def teapot(error):
 
 if __name__ == "__main__":
     app.run(debug=True)
+
+
+# AI used for:
+# - organize the code, adjust comments, ensure proper formatting
+# - help find what was standard ways to work with Flask, find documentation, and discover best practices
+# - Discover the blueprints method and how to use it
+# - Get more information about the Flask session object and how to use it
+# - Organize the readme file for better understanding, adjust the markdown format and translate it to English.

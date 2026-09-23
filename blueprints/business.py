@@ -2,11 +2,11 @@ import sqlite3
 from flask import Blueprint, redirect, render_template, request, session, url_for, flash
 from werkzeug.security import check_password_hash, generate_password_hash
 
+from constants import BUSINESS_CATEGORIES, BUSINESS_DDDS, BRAZILIAN_STATES
 from helpers import apology, get_db, normalize_phone, normalize_street
 
 # Definindo o Blueprint com prefixo de URL automático
 business_bp = Blueprint("business", __name__, url_prefix="/business")
-
 
 # Trava de segurança isolada para TODO o módulo /business
 @business_bp.before_request
@@ -36,8 +36,34 @@ def business_landing():
     if session.get("user_id") and session.get("user_type") == 1:
         return redirect("/business/home")
 
+    conn = get_db()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT COUNT(*) AS total FROM users WHERE user_type = 2")
+    client_count = cursor.fetchone()["total"]
+
+    cursor.execute("""
+        SELECT COUNT(DISTINCT bp.user_id) AS total
+        FROM business_providers bp
+        WHERE bp.role = 'provider' AND bp.status = 'active'
+    """)
+    provider_count = cursor.fetchone()["total"]
+
+    cursor.execute("""
+        SELECT COUNT(*) AS total
+        FROM appointment
+        WHERE status != 'cancelled'
+    """)
+    appointment_count = cursor.fetchone()["total"]
+    conn.close()
+
     session.clear()
-    return render_template("business.html")
+    return render_template(
+        "business.html",
+        client_count=client_count,
+        provider_count=provider_count,
+        appointment_count=appointment_count
+    )
 
 
 # Página inicial do parceiro (acessada via /business/home)
@@ -151,7 +177,7 @@ def register_business():
 
         return redirect("/business/home")
     else:
-        return render_template("business-register.html")
+        return render_template("business-register.html", ddds=BUSINESS_DDDS)
 
 
 # Cadastro de Estabelecimento (Acessado via /business/addbusiness)
@@ -222,7 +248,12 @@ def add_store():
 
         return redirect("/business/home")
     else:
-        return render_template("business-addbusiness.html")
+        return render_template(
+            "business-addbusiness.html",
+            ddds=BUSINESS_DDDS,
+            categories=BUSINESS_CATEGORIES,
+            states=BRAZILIAN_STATES
+        )
 
 
 # Solicitação para entrar em equipe (Acessado via /business/join)
@@ -461,7 +492,13 @@ def edit_business(business_id):
             return redirect(url_for("business.manage_business", business_id=business_id))
 
     conn.close()
-    return render_template("business-edit.html", business=business)
+    return render_template(
+        "business-edit.html",
+        business=business,
+        ddds=BUSINESS_DDDS,
+        categories=BUSINESS_CATEGORIES,
+        states=BRAZILIAN_STATES
+    )
 
 
 # 2. ROTA DE VISUALIZAÇÃO / PAINEL DO PRESTADOR

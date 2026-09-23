@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 from flask import Blueprint, flash, redirect, render_template, request, session, jsonify, url_for
 from werkzeug.security import check_password_hash, generate_password_hash
 
+from constants import BUSINESS_DDDS
 from helpers import apology, get_db, login_required, normalize_phone
 
 # Definindo o Blueprint
@@ -221,7 +222,7 @@ def register_user():
 
         return redirect("/")
     else:
-        return render_template("register.html")
+        return render_template("register.html", ddds=BUSINESS_DDDS)
 
 
 # Encerramento da sessão
@@ -562,3 +563,10 @@ def create_appointment():
 
     flash("Agendamento realizado com sucesso!", "success")
     return redirect(url_for("client.index"))
+
+
+# Rotas de desenvolvimento
+
+@client_bp.route("/dev/ui")
+def ui_playground():
+    return render_template("bootstrap-playground.html")

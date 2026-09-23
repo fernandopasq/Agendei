@@ -1,0 +1,429 @@
+<!--AI GENERATED HTML TO EXPLORE UI FEATURES OF BOOTSTRAP 5.3 AND CSS STYLES-->
+
+<!DOCTYPE html>
+<html lang="pt-BR" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Playground Bootstrap 5.3 - Catppuccin Mocha</title>
+    
+    <!-- Bootstrap 5.3 CSS CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <style>
+        /* ==========================================================================
+           1. ESTILOS DO SEU MAIN.CSS (Variáveis Catppuccin Mocha + Overrides)
+           ========================================================================== */
+        @charset "UTF-8";
+
+        /* Import Google Fonts (JetBrains Mono & Inter) */
+        @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:ital,wght@0,400;0,500;0,700;1,400&display=swap");
+
+        :root,
+        [data-bs-theme=dark] {
+          --bs-rosewater: #f5e0dc;
+          --bs-rosewater-rgb: 245, 224, 220;
+          --bs-flamingo: #f2cdcd;
+          --bs-flamingo-rgb: 242, 205, 205;
+          --bs-pink: #f5c2e7;
+          --bs-pink-rgb: 245, 194, 231;
+          --bs-mauve: #cba6f7;
+          --bs-mauve-rgb: 203, 166, 247;
+          --bs-red: #f38ba8;
+          --bs-red-rgb: 243, 139, 168;
+          --bs-maroon: #eba0ac;
+          --bs-maroon-rgb: 235, 160, 172;
+          --bs-peach: #fab387;
+          --bs-peach-rgb: 250, 179, 135;
+          --bs-yellow: #f9e2af;
+          --bs-yellow-rgb: 249, 226, 175;
+          --bs-green: #a6e3a1;
+          --bs-green-rgb: 166, 227, 161;
+          --bs-teal: #94e2d5;
+          --bs-teal-rgb: 148, 226, 213;
+          --bs-sky: #89dceb;
+          --bs-sky-rgb: 137, 220, 235;
+          --bs-sapphire: #74c7ec;
+          --bs-sapphire-rgb: 116, 199, 236;
+          --bs-blue: #89b4fa;
+          --bs-blue-rgb: 137, 180, 250;
+          --bs-lavender: #b4befe;
+          --bs-lavender-rgb: 180, 190, 254;
+          --bs-text: #cdd6f4;
+          --bs-text-rgb: 205, 214, 244;
+          --bs-subtext1: #bac2de;
+          --bs-subtext1-rgb: 186, 194, 222;
+          --bs-subtext0: #a6adc8;
+          --bs-subtext0-rgb: 166, 173, 200;
+          --bs-overlay2: #9399b2;
+          --bs-overlay2-rgb: 147, 153, 178;
+          --bs-overlay1: #7f849c;
+          --bs-overlay1-rgb: 127, 132, 156;
+          --bs-overlay0: #6c7086;
+          --bs-overlay0-rgb: 108, 112, 134;
+          --bs-surface2: #585b70;
+          --bs-surface2-rgb: 88, 91, 112;
+          --bs-surface1: #45475a;
+          --bs-surface1-rgb: 69, 71, 90;
+          --bs-surface0: #313244;
+          --bs-surface0-rgb: 49, 50, 68;
+          --bs-base: #1e1e2e;
+          --bs-base-rgb: 30, 30, 46;
+          --bs-mantle: #181825;
+          --bs-mantle-rgb: 24, 24, 37;
+          --bs-crust: #11111b;
+          --bs-crust-rgb: 17, 17, 27;
+
+          --bs-primary: #89b4fa;
+          --bs-primary-rgb: 137, 180, 250;
+          --bs-secondary: #b4befe;
+          --bs-secondary-rgb: 180, 190, 254;
+          --bs-success: #a6e3a1;
+          --bs-success-rgb: 166, 227, 161;
+          --bs-info: #89dceb;
+          --bs-info-rgb: 137, 220, 235;
+          --bs-warning: #fab387;
+          --bs-warning-rgb: 250, 179, 135;
+          --bs-danger: #f38ba8;
+          --bs-danger-rgb: 243, 139, 168;
+          --bs-light: #313244;
+          --bs-light-rgb: 49, 50, 68;
+          --bs-dark: #11111b;
+          --bs-dark-rgb: 17, 17, 27;
+
+          --bs-body-font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+          --bs-font-monospace: "JetBrains Mono", monospace;
+          --bs-body-color: #cdd6f4;
+          --bs-body-bg: #1e1e2e;
+          --bs-body-bg-rgb: 30, 30, 46;
+          --bs-border-color: #45475a;
+          --bs-border-color-translucent: rgba(69, 71, 90, 0.5);
+          --bs-heading-color: #cba6f7;
+          --bs-link-color: #89b4fa;
+          --bs-link-hover-color: #b4befe;
+          --bs-code-color: #f5c2e7;
+        }
+
+        body {
+          font-family: var(--bs-body-font-family);
+          background-color: var(--bs-body-bg);
+          color: var(--bs-body-color);
+        }
+
+        /* Utilitários Extras para as Cores do Catppuccin */
+        .text-rosewater { color: var(--bs-rosewater) !important; }
+        .text-flamingo { color: var(--bs-flamingo) !important; }
+        .text-pink { color: var(--bs-pink) !important; }
+        .text-mauve { color: var(--bs-mauve) !important; }
+        .text-maroon { color: var(--bs-maroon) !important; }
+        .text-peach { color: var(--bs-peach) !important; }
+        .text-teal { color: var(--bs-teal) !important; }
+        .text-sky { color: var(--bs-sky) !important; }
+        .text-sapphire { color: var(--bs-sapphire) !important; }
+        .text-lavender { color: var(--bs-lavender) !important; }
+        .text-subtext1 { color: var(--bs-subtext1) !important; }
+        .text-subtext0 { color: var(--bs-subtext0) !important; }
+
+        .bg-rosewater { background-color: var(--bs-rosewater) !important; color: #11111b; }
+        .bg-flamingo { background-color: var(--bs-flamingo) !important; color: #11111b; }
+        .bg-pink { background-color: var(--bs-pink) !important; color: #11111b; }
+        .bg-mauve { background-color: var(--bs-mauve) !important; color: #11111b; }
+        .bg-maroon { background-color: var(--bs-maroon) !important; color: #11111b; }
+        .bg-peach { background-color: var(--bs-peach) !important; color: #11111b; }
+        .bg-teal { background-color: var(--bs-teal) !important; color: #11111b; }
+        .bg-sky { background-color: var(--bs-sky) !important; color: #11111b; }
+        .bg-sapphire { background-color: var(--bs-sapphire) !important; color: #11111b; }
+        .bg-lavender { background-color: var(--bs-lavender) !important; color: #11111b; }
+        .bg-surface0 { background-color: var(--bs-surface0) !important; }
+        .bg-surface1 { background-color: var(--bs-surface1) !important; }
+        .bg-surface2 { background-color: var(--bs-surface2) !important; }
+        .bg-mantle { background-color: var(--bs-mantle) !important; }
+        .bg-crust { background-color: var(--bs-crust) !important; }
+
+        /* Estilo do Card Interno do Playground */
+        .playground-card {
+            background-color: var(--bs-mantle);
+            border: 1px solid var(--bs-border-color);
+            border-radius: var(--bs-border-radius-lg);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .code-label {
+            display: inline-block;
+            background-color: var(--bs-crust);
+            color: var(--bs-pink);
+            padding: 0.2rem 0.5rem;
+            font-family: var(--bs-font-monospace);
+            font-size: 0.8rem;
+            border-radius: var(--bs-border-radius-sm);
+            border: 1px solid var(--bs-border-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .color-box {
+            height: 60px;
+            border-radius: var(--bs-border-radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.85rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header / Navbar -->
+    <nav class="navbar navbar-expand-lg border-bottom bg-mantle mb-4">
+        <div class="container-fluid">
+            <a class="navbar-brand text-mauve fw-bold" href="#">
+                🎨 UI Playground Bootstrap 5.3
+            </a>
+            <span class="navbar-text text-subtext0">
+                Tema: Catppuccin Mocha
+            </span>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <main class="container pb-5">
+
+        <div class="mb-4">
+            <h1 class="display-5 text-mauve fw-bold">Bootstrap 5.3 + CSS Customizado</h1>
+            <p class="text-subtext1">Exibição completa dos componentes, classes de utilitários, temas de cores e backgrounds configurados no seu CSS.</p>
+        </div>
+
+        <!-- ==================== 1. PALETA DE CORES (PADRÃO + EXTENSÕES) ==================== -->
+        <section class="playground-card">
+            <h2 class="h4 text-mauve mb-3">1. Cores Padrão do Bootstrap (Override no CSS)</h2>
+            <div class="row g-3 mb-4">
+                <div class="col-6 col-md-3">
+                    <span class="code-label">.bg-primary</span>
+                    <div class="color-box bg-primary text-dark">Primary (#89b4fa)</div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <span class="code-label">.bg-secondary</span>
+                    <div class="color-box bg-secondary text-dark">Secondary (#b4befe)</div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <span class="code-label">.bg-success</span>
+                    <div class="color-box bg-success text-dark">Success (#a6e3a1)</div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <span class="code-label">.bg-danger</span>
+                    <div class="color-box bg-danger text-dark">Danger (#f38ba8)</div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <span class="code-label">.bg-warning</span>
+                    <div class="color-box bg-warning text-dark">Warning (#fab387)</div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <span class="code-label">.bg-info</span>
+                    <div class="color-box bg-info text-dark">Info (#89dceb)</div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <span class="code-label">.bg-light</span>
+                    <div class="color-box bg-light text-body">Light (#313244)</div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <span class="code-label">.bg-dark</span>
+                    <div class="color-box bg-dark text-white">Dark (#11111b)</div>
+                </div>
+            </div>
+
+            <h2 class="h5 text-mauve mb-3">Cores Estendidas do Catppuccin</h2>
+            <div class="row g-3">
+                <div class="col-6 col-md-2"><div class="color-box bg-rosewater">Rosewater</div></div>
+                <div class="col-6 col-md-2"><div class="color-box bg-flamingo">Flamingo</div></div>
+                <div class="col-6 col-md-2"><div class="color-box bg-pink">Pink</div></div>
+                <div class="col-6 col-md-2"><div class="color-box bg-mauve">Mauve</div></div>
+                <div class="col-6 col-md-2"><div class="color-box bg-maroon">Maroon</div></div>
+                <div class="col-6 col-md-2"><div class="color-box bg-peach">Peach</div></div>
+                <div class="col-6 col-md-2"><div class="color-box bg-teal">Teal</div></div>
+                <div class="col-6 col-md-2"><div class="color-box bg-sky">Sky</div></div>
+                <div class="col-6 col-md-2"><div class="color-box bg-sapphire">Sapphire</div></div>
+                <div class="col-6 col-md-2"><div class="color-box bg-lavender">Lavender</div></div>
+            </div>
+        </section>
+
+        <!-- ==================== 2. BACKGROUNDS E SUPERFÍCIES ==================== -->
+        <section class="playground-card">
+            <h2 class="h4 text-mauve mb-3">2. Camadas de Background e Superfícies (Surfaces)</h2>
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <span class="code-label">.bg-mantle</span>
+                    <div class="p-3 bg-mantle border rounded text-center">Mantle (#181825)</div>
+                </div>
+                <div class="col-md-4">
+                    <span class="code-label">.bg-crust</span>
+                    <div class="p-3 bg-crust border rounded text-center">Crust (#11111b)</div>
+                </div>
+                <div class="col-md-4">
+                    <span class="code-label">.bg-surface0</span>
+                    <div class="p-3 bg-surface0 border rounded text-center">Surface 0 (#313244)</div>
+                </div>
+                <div class="col-md-4">
+                    <span class="code-label">.bg-surface1</span>
+                    <div class="p-3 bg-surface1 border rounded text-center">Surface 1 (#45475a)</div>
+                </div>
+                <div class="col-md-4">
+                    <span class="code-label">.bg-surface2</span>
+                    <div class="p-3 bg-surface2 border rounded text-center">Surface 2 (#585b70)</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== 3. TIPOGRAFIA E CORES DE TEXTO ==================== -->
+        <section class="playground-card">
+            <h2 class="h4 text-mauve mb-3">3. Tipografia & Utilitários de Texto</h2>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <span class="code-label">Cores de Texto Utilitárias</span>
+                    <p class="text-primary mb-1">.text-primary (Blue)</p>
+                    <p class="text-secondary mb-1">.text-secondary (Lavender)</p>
+                    <p class="text-success mb-1">.text-success (Green)</p>
+                    <p class="text-danger mb-1">.text-danger (Red)</p>
+                    <p class="text-warning mb-1">.text-warning (Peach)</p>
+                    <p class="text-subtext1 mb-1">.text-subtext1</p>
+                    <p class="text-subtext0 mb-1">.text-subtext0</p>
+                </div>
+                <div class="col-md-6">
+                    <span class="code-label">Fontes Customizadas do CSS</span>
+                    <p style="font-family: var(--bs-body-font-family);">
+                        <strong>Inter (Corpo):</strong> O rápido cão marrom salta sobre o cão preguiçoso.
+                    </p>
+                    <p style="font-family: var(--bs-font-monospace);" class="text-pink">
+                        <strong>JetBrains Mono (Código):</strong> const express = require('express');
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== 4. TAGS E BADGES ==================== -->
+        <section class="playground-card">
+            <h2 class="h4 text-mauve mb-3">4. Tags e Badges (.badge)</h2>
+            <p class="text-subtext1">Exemplo de etiquetas e identificadores do Bootstrap:</p>
+            
+            <div class="d-flex flex-wrap gap-2 mb-3">
+                <span class="badge bg-primary">.bg-primary</span>
+                <span class="badge bg-secondary text-dark">.bg-secondary</span>
+                <span class="badge bg-success text-dark">.bg-success</span>
+                <span class="badge bg-danger text-dark">.bg-danger</span>
+                <span class="badge bg-warning text-dark">.bg-warning</span>
+                <span class="badge bg-info text-dark">.bg-info</span>
+                <span class="badge bg-mauve">.bg-mauve</span>
+                <span class="badge bg-teal">.bg-teal</span>
+                <span class="badge bg-peach">.bg-peach</span>
+            </div>
+
+            <div class="d-flex flex-wrap gap-2">
+                <span class="badge rounded-pill bg-primary">Pill Primary</span>
+                <span class="badge rounded-pill bg-success text-dark">Pill Success</span>
+                <span class="badge rounded-pill bg-danger text-dark">Pill Danger</span>
+            </div>
+        </section>
+
+        <!-- ==================== 5. CARDS ==================== -->
+        <section class="playground-card">
+            <h2 class="h4 text-mauve mb-3">5. Cards (.card)</h2>
+            <div class="row g-4">
+                <!-- Card Padrão -->
+                <div class="col-md-4">
+                    <span class="code-label">Card Padrão</span>
+                    <div class="card">
+                        <div class="card-header fw-bold">Card Header</div>
+                        <div class="card-body">
+                            <h5 class="card-title text-mauve">Título do Card</h5>
+                            <p class="card-text text-subtext1">Este é um exemplo de card utilizando as cores de fundo e borda configuradas.</p>
+                            <a href="#" class="btn btn-primary btn-sm">Ação Principal</a>
+                        </div>
+                        <div class="card-footer text-subtext0">Rodapé do Card</div>
+                    </div>
+                </div>
+
+                <!-- Card com Borda Destaque -->
+                <div class="col-md-4">
+                    <span class="code-label">Card (.border-primary)</span>
+                    <div class="card border-primary">
+                        <div class="card-header border-primary text-primary fw-bold">Destaque Primário</div>
+                        <div class="card-body">
+                            <h5 class="card-title">Card com Borda Colorida</h5>
+                            <p class="card-text text-subtext1">Aplicações com utilitários do bootstrap como <code>.border-primary</code>.</p>
+                            <span class="badge bg-primary">Tag Exemplo</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card de Superfície Interna -->
+                <div class="col-md-4">
+                    <span class="code-label">Card Customizado (.bg-surface0)</span>
+                    <div class="card bg-surface0 border-0">
+                        <div class="card-body">
+                            <h5 class="card-title text-peach">Superfície Elevada</h5>
+                            <p class="card-text text-subtext1">Sem bordas, utilizando a variável de fundo de superfície 0.</p>
+                            <button class="btn btn-outline-warning btn-sm">Detalhes</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== 6. BOTÕES ==================== -->
+        <section class="playground-card">
+            <h2 class="h4 text-mauve mb-3">6. Botões (.btn)</h2>
+            <div class="d-flex flex-wrap gap-2 mb-3">
+                <button class="btn btn-primary">Primary</button>
+                <button class="btn btn-secondary">Secondary</button>
+                <button class="btn btn-success">Success</button>
+                <button class="btn btn-danger">Danger</button>
+                <button class="btn btn-warning">Warning</button>
+                <button class="btn btn-info">Info</button>
+                <button class="btn btn-light">Light</button>
+                <button class="btn btn-dark">Dark</button>
+            </div>
+
+            <span class="code-label">Botões Outline (.btn-outline-*)</span>
+            <div class="d-flex flex-wrap gap-2 mt-2">
+                <button class="btn btn-outline-primary">Primary</button>
+                <button class="btn btn-outline-secondary">Secondary</button>
+                <button class="btn btn-outline-success">Success</button>
+                <button class="btn btn-outline-danger">Danger</button>
+            </div>
+        </section>
+
+        <!-- ==================== 7. FORMULÁRIOS ==================== -->
+        <section class="playground-card">
+            <h2 class="h4 text-mauve mb-3">7. Formulários (.form-control / .form-select)</h2>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <span class="code-label">Input de Texto</span>
+                    <label class="form-label">Email</label>
+                    <input type="email" class="form-control" placeholder="nome@exemplo.com">
+                </div>
+                <div class="col-md-6">
+                    <span class="code-label">Select</span>
+                    <label class="form-label">Opção</label>
+                    <select class="form-select">
+                        <option selected>Selecione um item...</option>
+                        <option value="1">Opção 1</option>
+                        <option value="2">Opção 2</option>
+                    </select>
+                </div>
+                <div class="col-md-12">
+                    <span class="code-label">Switch & Checkbox</span>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="switchEx" checked>
+                        <label class="form-check-label" for="switchEx">Alternância Ativa</label>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Bootstrap 5.3 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

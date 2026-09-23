@@ -88,7 +88,39 @@ O acesso é controlado pela sessão:
 
 ---
 
-## 5. Estrutura do Projeto
+## 5. Decisões de Design
+
+### Separação por Blueprint e limites de acesso
+
+A aplicação é dividida entre `client_bp` e `business_bp` para que cada área tenha um limite de responsabilidade claro. Essa separação não é apenas organizacional: cada Blueprint possui proteções por requisição que verificam o tipo de usuário na sessão antes de liberar rotas protegidas. Assim, clientes e parceiros têm fluxos, rotas e painéis realmente separados, enquanto o perfil compartilhado permanece disponível de forma intencional para os dois tipos de usuário.
+
+### Modelo unificado de conta Business
+
+A área Business foi projetada com uma única conta de parceiro, em vez de contas separadas para proprietário e prestador. Qualquer usuário Business pode criar um novo estabelecimento ou solicitar participação em uma equipe existente. O tipo geral da conta identifica apenas que se trata de um parceiro; o papel efetivo é definido por estabelecimento, através da relação entre `business.owner_id` e `business_providers`, que registra papel, status, vínculo de prestador e solicitações pendentes.
+
+Esse modelo mantém a conta flexível sem perder o controle explícito de autorização. Um usuário pode ser proprietário de um estabelecimento e prestador em outro, sem precisar de contas duplicadas ou de uma migração manual de papel. O fluxo de solicitação é necessário porque entrar em uma equipe não deve conceder permissão imediatamente: o prestador envia a solicitação, o proprietário analisa e somente a aprovação, com vínculo ativo, libera os recursos da equipe e a associação aos serviços.
+
+Essa distinção também orienta a interface. O menu inicial Business oferece tanto a criação de um estabelecimento quanto a opção de procurar e solicitar entrada em uma equipe. Os cards dos estabelecimentos identificam se o usuário atual é proprietário ou prestador ativo e exibem as ações correspondentes. Proprietários acessam um dashboard de gestão com serviços, equipe, solicitações pendentes e agendamentos; prestadores recebem um dashboard focado nos serviços atribuídos e na própria agenda. Assim, uma única conta permanece simples de usar, sem esconder as responsabilidades diferentes existentes dentro de cada estabelecimento.
+
+### Linguagem visual centralizada com SCSS
+
+O SCSS concentra a maior parte das regras visuais próprias do projeto em um único lugar, evitando espalhar valores do tema pelos templates. Isso facilita manter de forma consistente a paleta Catppuccin, as sobrescritas do Bootstrap, espaçamentos, superfícies e comportamento responsivo. Os templates ficam concentrados em estrutura e conteúdo, enquanto o CSS compilado carrega o sistema visual.
+
+### Registro progressivo de agendamentos com JavaScript
+
+A página de agendamento utiliza JavaScript e requisições assíncronas com `fetch` para carregar progressivamente os prestadores e os horários disponíveis depois que o cliente escolhe serviço, profissional e data. Isso torna a interação mais fluida e evita criar um HTML separado para cada estado intermediário. O servidor continua recalculando a disponibilidade e validando o agendamento final, portanto a interação no cliente não substitui a validação no backend.
+
+### Funções helper pequenas e focadas
+
+Os comportamentos compartilhados ficam em `helpers.py`, por meio de funções específicas como `login_required` para controle de acesso, `apology` para erros padronizados, `get_db` e `close_db` para o ciclo de vida do banco, `normalize_phone` e `normalize_street` para normalização de entradas e helpers de formatação de moeda, telefone e slug de categoria. Manter essas responsabilidades em funções pequenas reduz duplicação nas rotas e oferece um único lugar para evoluir cada comportamento repetido.
+
+### Filtros hierárquicos de localização em vez de coordenadas
+
+Os estabelecimentos armazenam campos estruturados como estado, cidade, bairro e logradouro. A página inicial utiliza queries SQL e filtros dependentes para restringir os resultados seguindo essa hierarquia. Essa foi uma decisão deliberada de escopo: uma busca baseada em coordenadas exigiria geocodificação, dados cartográficos e APIs externas, aumentando a complexidade operacional e dificultando a divulgação aberta do projeto. Para um projeto desse tamanho, filtros SQL são suficientes para demonstrar claramente a descoberta de estabelecimentos sem adicionar uma infraestrutura que não é essencial ao problema central de agendamento.
+
+---
+
+## 6. Estrutura do Projeto
 
 <details>
   <summary><b>Visualizar Árvore de Arquivos e Detalhes</b> (Clique para expandir)</summary>
@@ -144,7 +176,7 @@ project/
 
 ---
 
-## 6. Banco de Dados e Migrações
+## 7. Banco de Dados e Migrações
 
 <details>
   <summary><b>Estrutura e Lógica de Disponibilidade</b> (Clique para expandir)</summary>
@@ -182,7 +214,7 @@ A validação é feita no frontend e repetida estritamente no backend antes da i
 
 ---
 
-## 7. Como Instalar e Executar
+## 8. Como Instalar e Executar
 
 ### Pré-requisitos
 
@@ -218,6 +250,6 @@ A validação é feita no frontend e repetida estritamente no backend antes da i
 
 ---
 
-## 8. Licença
+## 9. Licença
 
 Distribuído sob a licença MIT. Veja `LICENSE` para mais informações.
