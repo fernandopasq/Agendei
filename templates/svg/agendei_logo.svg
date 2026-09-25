@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="512"
+   height="512"
+   viewBox="0 0 512 512"
+   version="1.1"
+   id="svg1"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs1">
+    <marker
+       markerWidth="61.029411"
+       markerHeight="103.75"
+       refX="26.824602"
+       refY="47.817768"
+       orient="auto"
+       id="marker7"
+       viewBox="0 0 53.649204 95.635536"
+       preserveAspectRatio="xMidYMid"
+       markerUnits="userSpaceOnUse">
+      <rect
+         style="fill:#b4befe;fill-opacity:1"
+         id="rect2"
+         width="53.649204"
+         height="95.635536"
+         x="0"
+         y="0"
+         ry="26" />
+    </marker>
+  </defs>
+  <g
+     id="layer1"
+     transform="translate(0,31.607483)">
+    <path
+       id="rect1"
+       style="fill:#b4befe;fill-opacity:1"
+       d="m 155.61523,44.453064 v 23.669922 c 0,21.902142 -17.64278,39.544924 -39.54492,39.544924 h -1.78906 c -21.902055,0 -39.546875,-17.641972 -39.546875,-39.544924 V 46.617126 C 56.96372,52.383266 44.185547,69.029999 44.185547,88.771423 V 423.22845 c 0,24.55268 19.765686,44.31836 44.318359,44.31836 H 423.49609 c 24.55268,0 44.31836,-19.76568 44.31836,-44.31836 V 88.771423 c 0,-19.741426 -12.77816,-36.388158 -30.54883,-42.154297 v 21.50586 c 3e-5,21.902952 -17.64481,39.544924 -39.54687,39.544924 h -1.78906 c -21.90214,0 -39.54492,-17.642782 -39.54492,-39.544924 V 44.453064 h -59.94336 v 23.669922 c 0,21.902952 -17.64482,39.544924 -39.54688,39.544924 h -1.78906 c -21.90206,0 -39.54688,-17.641972 -39.54688,-39.544924 V 44.453064 Z m -55.09765,79.542966 h 310.96484 c 18.43408,0 33.27539,14.83937 33.27539,33.27344 v 251.10938 c 0,18.43407 -14.84131,33.27539 -33.27539,33.27539 H 100.51758 c -18.434076,0 -33.275392,-14.84132 -33.275392,-33.27539 V 157.26947 c 0,-18.43407 14.841316,-33.27344 33.275392,-33.27344 z" />
+    <path
+       style="fill:none;fill-opacity:1;stroke:none;stroke-width:5.54472;stroke-dasharray:none;stroke-opacity:1;marker-start:url(#marker7);marker-mid:url(#marker7);marker-end:url(#marker7)"
+       d="M 115.17491,44.453247 H 256 396.82508"
+       id="path7" />
+    <path
+       d="M 316.52739,416.42593 304.99836,386.57399 H 215.6484 l 18.94055,-54.14525 h 49.41011 L 210.91327,143.22916 h 88.73233 l 108.90813,273.19677 z m -213.08113,0 97.58498,-260.84424 40.3516,108.49638 -50.02774,152.34786 z"
+       id="text17"
+       style="font-size:421.633px;font-family:'Black Ops One';-inkscape-font-specification:'Black Ops One';fill:#b4befe;stroke-width:12.177"
+       aria-label="A" />
+  </g>
+</svg>

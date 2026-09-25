@@ -6,15 +6,43 @@
 
 <div class="container py-4">
 
-    <!-- Cabeçalho e Barra de Pesquisa -->
-    <div class="text-center mb-4">
-        {% if user_name %}
-            <h1 class="display-6 fw-bold mb-2">Bem-vindo, {{ user_name }}!</h1>
-            <p class="text-muted">Encontre e agende seu próximo serviço</p>
-        {% else %}
-            <h1 class="display-6 fw-bold mb-2">Encontre e Agende Serviços</h1>
-            <p class="text-muted">Descubra estabelecimentos e profissionais perto de você</p>
-        {% endif %}
+<!-- Estilo de enquadramento do SVG do Hero -->
+    <style>
+        .hero-svg-container svg {
+            width: 100% !important;
+            height: auto !important;
+            max-height: 260px !important;
+            object-fit: contain;
+        }
+    </style>
+
+    <!-- Hero Section -->
+    <div class="row align-items-center py-4 mb-4 g-4 overflow-hidden">
+        <!-- Texto de Apresentação (Esquerda) -->
+        <div class="col-12 col-md-7 text-center text-md-start">
+            {% if user_name %}
+                <h1 class="display-5 fw-bold mb-3">
+                    Bem-vindo, {{ user_name }}!
+                </h1>
+                <p class="lead text-muted mb-0">
+                    Encontre e agende seu próximo serviço
+                </p>
+            {% else %}
+                <h1 class="display-5 fw-bold mb-3">
+                    Encontre e Agende Serviços
+                </h1>
+                <p class="lead text-muted mb-0">
+                    Descubra estabelecimentos e profissionais perto de você
+                </p>
+            {% endif %}
+        </div>
+
+        <!-- Ilustração SVG (Direita Enquadrada) -->
+        <div class="col-12 col-md-5 d-flex justify-content-center justify-content-md-end align-items-center">
+            <div class="hero-svg-container" style="max-width: 350px; width: 100%;">
+                {% include "svg/macaco-agendando.svg" %}
+            </div>
+        </div>
     </div>
 
     <!-- Formulário de Filtros e Busca -->
