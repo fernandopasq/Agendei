@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="templates/svg/agendei_logo-full.svg" alt="Agendei Logo" width="300">
+</p>
+
 # Agendei
 
 *Read this in other languages: [Português](README.pt-BR.md)*
