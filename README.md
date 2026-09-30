@@ -4,9 +4,11 @@
 
 # Agendei
 
+### Video Demo: https://www.youtube.com/watch?v=yOo3XS8nt2Q&t=29s
+
 *Read this in other languages: [Português](README.pt-BR.md)*
 
-## 1. Overview
+## 1. Description:
 
 **Agendei** is a web application designed for service discovery and appointment scheduling. It bridges the gap between clients, local businesses, and independent service providers by allowing each appointment to have a specified service, duration, date, time, and assigned professional.
 
