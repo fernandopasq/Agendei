@@ -1,0 +1,52 @@
+{% extends "layout.html" %}
+
+{% block title %}Excluir conta{% endblock %}
+
+{% block body %}
+<div class="container py-4" style="max-width: 760px;">
+    <div class="mb-4">
+        <h1 class="h3 fw-bold text-danger mb-1">Excluir conta</h1>
+        <p class="text-muted mb-0">Revise o que será removido antes de confirmar.</p>
+    </div>
+
+    <div class="alert alert-danger" role="alert">
+        <strong>Esta ação é permanente.</strong> A exclusão removerá também os dados vinculados à sua conta.
+    </div>
+
+    {% if impact.account_role == "cliente" %}
+        <p>
+            Como cliente, sua conta e todos os seus
+            <strong>{{ impact.appointment_count }} agendamento(s)</strong> serão removidos.
+        </p>
+    {% elif impact.account_role == "proprietário" %}
+        <p>Como proprietário, serão removidos:</p>
+        <ul>
+            <li><strong>{{ impact.business_count }} estabelecimento(s)</strong> de sua propriedade e seus dados vinculados;</li>
+            <li><strong>{{ impact.service_count }} serviço(s)</strong> desses estabelecimentos;</li>
+            <li><strong>{{ impact.appointment_count }} agendamento(s)</strong> vinculados a você ou a esses estabelecimentos;</li>
+            <li><strong>{{ impact.provider_link_count }} vínculo(s)</strong> como prestador nesses estabelecimentos ou em outras equipes;</li>
+            <li><strong>{{ impact.provider_service_count }} associação(ões)</strong> entre prestadores e serviços.</li>
+        </ul>
+    {% else %}
+        <p>
+            Como prestador, sua conta, os
+            <strong>{{ impact.appointment_count }} agendamento(s)</strong> vinculados a você e os
+            <strong>{{ impact.provider_link_count }} vínculo(s)</strong> como prestador, incluindo
+            <strong>{{ impact.provider_service_count }} associação(ões)</strong> a serviços, serão removidos.
+        </p>
+    {% endif %}
+
+    <form method="post">
+        <div class="form-check mb-3">
+            <input class="form-check-input" type="checkbox" id="confirm" name="confirm" value="yes" required>
+            <label class="form-check-label" for="confirm">
+                Entendo que não será possível recuperar minha conta nem os dados removidos.
+            </label>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            <button class="btn btn-danger" type="submit">Confirmar exclusão da conta</button>
+            <a class="btn btn-outline-secondary" href="{{ url_for('profile') }}">Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

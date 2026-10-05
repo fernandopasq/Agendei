@@ -6,15 +6,15 @@
 <div class="container py-4" style="max-width: 980px;">
     <div class="mb-4">
         <h1 class="h3 fw-bold mb-1">Meus Agendamentos</h1>
-        <p class="text-muted mb-0">Acompanhe seus serviços marcados e cancele quando necessário.</p>
+        <p class="text-muted mb-0">Acompanhe suas solicitações, confirmações e cancelamentos.</p>
     </div>
 
     {% if appointments %}
         <div class="d-flex flex-column gap-3">
             {% for appointment in appointments %}
-                <article class="card border-0 shadow-sm overflow-hidden">
+                <article class="card shadow-sm overflow-hidden {% if appointment.status == 'cancelled' %}border-danger bg-danger bg-opacity-10{% else %}border-0{% endif %}">
                     <div class="row g-0 align-items-stretch">
-                        <div class="col-12 col-sm-3 col-md-2 bg-primary text-white d-flex flex-column justify-content-center align-items-center p-3 text-center">
+                        <div class="col-12 col-sm-3 col-md-2 {% if appointment.status == 'cancelled' %}bg-danger{% else %}bg-primary{% endif %} text-white d-flex flex-column justify-content-center align-items-center p-3 text-center">
                             <span class="small text-uppercase fw-semibold opacity-75">Data</span>
                             <strong class="display-6 fw-bold lh-1">{{ appointment.date[8:10] }}</strong>
                             <span class="fw-semibold">{{ appointment.date[5:7] }}/{{ appointment.date[0:4] }}</span>
@@ -31,6 +31,8 @@
                                             <h2 class="h5 fw-bold mb-0">{{ appointment.service_name }}</h2>
                                             {% if appointment.status == 'cancelled' %}
                                                 <span class="badge bg-danger bg-opacity-10 text-danger fw-semibold">Cancelado</span>
+                                            {% elif appointment.status == 'requested' %}
+                                                <span class="badge bg-warning bg-opacity-10 text-warning fw-semibold">Aguardando confirmação</span>
                                             {% elif appointment.date < today %}
                                                 <span class="badge bg-secondary bg-opacity-10 text-secondary fw-semibold">Concluído</span>
                                             {% else %}
@@ -51,7 +53,7 @@
                                         <button class="btn btn-outline-secondary btn-sm text-nowrap" type="button" data-bs-toggle="collapse" data-bs-target="#appointment-details-{{ appointment.appointment_id }}" aria-expanded="false" aria-controls="appointment-details-{{ appointment.appointment_id }}">
                                             <i class="bi bi-chevron-down me-1"></i>Ver detalhes
                                         </button>
-                                        {% if appointment.status != 'cancelled' and appointment.date >= today %}
+                                        {% if appointment.status in ('requested', 'confirmed') and appointment.date >= today %}
                                             <form method="post" action="{{ url_for('client.cancel_client_appointment', appointment_id=appointment.appointment_id) }}" onsubmit="return confirm('Deseja realmente cancelar este agendamento?');">
                                                 <button type="submit" class="btn btn-outline-danger btn-sm text-nowrap">
                                                     <i class="bi bi-x-circle me-1"></i>Cancelar
@@ -80,12 +82,33 @@
                 </article>
             {% endfor %}
         </div>
+        {% if total_pages > 1 %}
+            <nav class="mt-4" aria-label="Páginas de agendamentos">
+                <ul class="pagination justify-content-center flex-wrap mb-0">
+                    <li class="page-item {% if current_page == 1 %}disabled{% endif %}">
+                        {% if current_page > 1 %}
+                        <a class="page-link" href="{{ url_for('client.my_appointments', page=current_page - 1) }}">Anterior</a>
+                        {% else %}
+                        <span class="page-link">Anterior</span>
+                        {% endif %}
+                    </li>
+                    <li class="page-item disabled"><span class="page-link">Página {{ current_page }} de {{ total_pages }}</span></li>
+                    <li class="page-item {% if current_page == total_pages %}disabled{% endif %}">
+                        {% if current_page < total_pages %}
+                        <a class="page-link" href="{{ url_for('client.my_appointments', page=current_page + 1) }}">Próxima</a>
+                        {% else %}
+                        <span class="page-link">Próxima</span>
+                        {% endif %}
+                    </li>
+                </ul>
+            </nav>
+        {% endif %}
     {% else %}
         <div class="card border-0 shadow-sm text-center py-5">
             <div class="card-body">
                 <i class="bi bi-calendar2-x text-muted display-4 mb-3 d-block"></i>
                 <h2 class="h5 fw-bold">Você ainda não tem agendamentos</h2>
-                <p class="text-muted mb-4">Encontre um serviço e marque seu primeiro atendimento.</p>
+                <p class="text-muted mb-4">Encontre um serviço e faça sua primeira solicitação de atendimento.</p>
                 <a href="{{ url_for('client.index') }}" class="btn btn-primary">Encontrar serviços</a>
             </div>
         </div>

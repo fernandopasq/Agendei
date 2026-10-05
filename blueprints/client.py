@@ -8,6 +8,10 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from constants import BUSINESS_DDDS
 from helpers import apology, get_db, login_required, normalize_phone
 
+BUSINESS_PAGE_SIZE = 12
+APPOINTMENT_PAGE_SIZE = 15
+
+
 # Definindo o Blueprint
 client_bp = Blueprint("client", __name__)
 
@@ -99,8 +103,24 @@ def index():
         query += " AND b.category = ?"
         params.append(selected_category)
 
-    query += " GROUP BY b.business_id ORDER BY b.business_name ASC"
-    cursor.execute(query, params)
+    business_count_query = (
+        "SELECT COUNT(DISTINCT b.business_id) "
+        + query[query.index("FROM business b"):]
+    )
+    cursor.execute(business_count_query, params)
+    total_businesses = cursor.fetchone()[0]
+    total_pages = max(
+        1,
+        (total_businesses + BUSINESS_PAGE_SIZE - 1) // BUSINESS_PAGE_SIZE
+    )
+    current_page = request.args.get("page", 1, type=int)
+    current_page = min(max(current_page, 1), total_pages)
+    query += " GROUP BY b.business_id ORDER BY b.business_name ASC LIMIT ? OFFSET ?"
+    business_params = params + [
+        BUSINESS_PAGE_SIZE,
+        (current_page - 1) * BUSINESS_PAGE_SIZE
+    ]
+    cursor.execute(query, business_params)
     businesses = cursor.fetchall()
 
     # Consultas para popular os selects de filtro dinamicamente
@@ -145,7 +165,11 @@ def index():
         selected_neighborhood=selected_neighborhood,
         selected_category=selected_category,
         user_name=user_name,
-        locations=locations
+        locations=locations,
+        current_page=current_page,
+        total_pages=total_pages,
+        total_businesses=total_businesses,
+        page_size=BUSINESS_PAGE_SIZE
     )
 
 # Login de usuário
@@ -260,10 +284,23 @@ def new_appointment(business_id):
 @client_bp.route("/appointments")
 @login_required
 def my_appointments():
-    """Lista os agendamentos do cliente, priorizando os mais próximos."""
+    """Lista os agendamentos do cliente do mais recente para o mais antigo."""
     conn = get_db()
     cursor = conn.cursor()
     today = datetime.now().strftime("%Y-%m-%d")
+
+    cursor.execute("""
+        SELECT COUNT(*)
+        FROM appointment a
+        WHERE a.user_id = ? AND a.status != 'completed'
+    """, (session["user_id"],))
+    total_appointments = cursor.fetchone()[0]
+    total_pages = max(
+        1,
+        (total_appointments + APPOINTMENT_PAGE_SIZE - 1) // APPOINTMENT_PAGE_SIZE
+    )
+    current_page = request.args.get("page", 1, type=int)
+    current_page = min(max(current_page, 1), total_pages)
 
     cursor.execute("""
         SELECT
@@ -289,19 +326,25 @@ def my_appointments():
         JOIN business b ON b.business_id = s.business_id
         LEFT JOIN users u ON u.user_id = a.provider_id
                 WHERE a.user_id = ?
-                    AND a.status NOT IN ('cancelled', 'completed')
-        ORDER BY
-            CASE WHEN a.date >= ? THEN 0 ELSE 1 END,
-            ABS(julianday(a.date) - julianday(?)),
-            a.appointment_time ASC
-    """, (session["user_id"], today, today))
+                    AND a.status != 'completed'
+        ORDER BY a.date DESC, a.appointment_time DESC, a.appointment_id DESC
+        LIMIT ? OFFSET ?
+    """, (
+        session["user_id"],
+        APPOINTMENT_PAGE_SIZE,
+        (current_page - 1) * APPOINTMENT_PAGE_SIZE
+    ))
     appointments = cursor.fetchall()
     conn.close()
 
     return render_template(
         "client-appointments.html",
         appointments=appointments,
-        today=today
+        today=today,
+        current_page=current_page,
+        total_pages=total_pages,
+        total_appointments=total_appointments,
+        page_size=APPOINTMENT_PAGE_SIZE
     )
 
 
@@ -316,7 +359,7 @@ def cancel_client_appointment(appointment_id):
         SET status = 'cancelled'
         WHERE appointment_id = ?
           AND user_id = ?
-          AND status != 'cancelled'
+          AND status IN ('requested', 'confirmed')
     """, (appointment_id, session["user_id"]))
     conn.commit()
     changed = cursor.rowcount
@@ -441,7 +484,7 @@ def get_availability():
                 JOIN services s ON s.service_id = a.service_id
                 WHERE a.date = ?
                     AND s.business_id = ?
-                    AND a.status != 'cancelled'
+                    AND a.status IN ('requested', 'confirmed')
         """, (date_str, business_id))
     existing_appointments = cursor.fetchall()
 
@@ -555,14 +598,14 @@ def create_appointment():
     cursor.execute("""
         INSERT INTO appointment
             (user_id, provider_id, service_id, date, appointment_time, duration_minutes, status)
-        VALUES (?, ?, ?, ?, ?, ?, 'confirmed')
+        VALUES (?, ?, ?, ?, ?, ?, 'requested')
     """, (session["user_id"], final_staff_id, service_id, date_str, time_str, duration))
 
     conn.commit()
     conn.close()
 
-    flash("Agendamento realizado com sucesso!", "success")
-    return redirect(url_for("client.index"))
+    flash("Solicitação de agendamento enviada. Aguarde a confirmação do estabelecimento.", "success")
+    return redirect(url_for("client.my_appointments"))
 
 
 # Rotas de desenvolvimento

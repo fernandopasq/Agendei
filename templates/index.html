@@ -179,6 +179,29 @@
                 </div>
             {% endfor %}
         </div>
+        {% if total_pages > 1 %}
+            <nav class="mt-4" aria-label="Páginas de estabelecimentos">
+                <ul class="pagination justify-content-center flex-wrap mb-0">
+                    <li class="page-item {% if current_page == 1 %}disabled{% endif %}">
+                        {% if current_page > 1 %}
+                        <a class="page-link" href="{{ url_for('client.index', q=search_query, state=selected_state, city=selected_city, neighborhood=selected_neighborhood, category=selected_category, page=current_page - 1) }}">Anterior</a>
+                        {% else %}
+                        <span class="page-link">Anterior</span>
+                        {% endif %}
+                    </li>
+                    <li class="page-item disabled">
+                        <span class="page-link">Página {{ current_page }} de {{ total_pages }}</span>
+                    </li>
+                    <li class="page-item {% if current_page == total_pages %}disabled{% endif %}">
+                        {% if current_page < total_pages %}
+                        <a class="page-link" href="{{ url_for('client.index', q=search_query, state=selected_state, city=selected_city, neighborhood=selected_neighborhood, category=selected_category, page=current_page + 1) }}">Próxima</a>
+                        {% else %}
+                        <span class="page-link">Próxima</span>
+                        {% endif %}
+                    </li>
+                </ul>
+            </nav>
+        {% endif %}
     {% else %}
         <div class="card border-0 shadow-sm py-5 text-center">
             <div class="card-body">

@@ -28,11 +28,39 @@ Painel do Prestador - {{ business.business_name }}
         <div class="card-body p-4">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h2 class="h5 fw-bold mb-0">Minha Agenda de Atendimentos</h2>
-                <span
-                    class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 fw-medium py-2 px-3">
-                    <i class="bi bi-sort-down me-1"></i> Ordenado por data
-                </span>
+                <a class="btn btn-outline-secondary btn-sm"
+                    href="{{ url_for('business.provider_view', business_id=business.business_id, status=status_filter, service_id=service_filter or '', order='desc' if sort_order == 'asc' else 'asc') }}">
+                    <i class="bi bi-sort-down me-1"></i>
+                    Data: {{ 'mais recentes primeiro' if sort_order == 'desc' else 'mais antigos primeiro' }}
+                </a>
             </div>
+
+            <form method="get" class="row g-2 align-items-end mb-3">
+                <div class="col-sm-6 col-lg-4">
+                    <label for="provider-appointment-status" class="form-label small mb-1">Status</label>
+                    <select class="form-select form-select-sm" id="provider-appointment-status" name="status">
+                        <option value="" {% if not status_filter %}selected{% endif %}>Todos</option>
+                        <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pendente</option>
+                        <option value="confirmed" {% if status_filter == 'confirmed' %}selected{% endif %}>Confirmado</option>
+                        <option value="cancelled" {% if status_filter == 'cancelled' %}selected{% endif %}>Cancelado</option>
+                        <option value="completed" {% if status_filter == 'completed' %}selected{% endif %}>Concluído</option>
+                    </select>
+                </div>
+                <div class="col-sm-6 col-lg-4">
+                    <label for="provider-appointment-service" class="form-label small mb-1">Serviço</label>
+                    <select class="form-select form-select-sm" id="provider-appointment-service" name="service_id">
+                        <option value="">Todos os serviços</option>
+                        {% for service in services %}
+                        <option value="{{ service.service_id }}" {% if service_filter == service.service_id %}selected{% endif %}>{{ service.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <input type="hidden" name="order" value="{{ sort_order }}">
+                <div class="col-sm-6 col-lg-4 d-flex gap-2">
+                    <button class="btn btn-primary btn-sm" type="submit">Filtrar</button>
+                    <a class="btn btn-outline-secondary btn-sm" href="{{ url_for('business.provider_view', business_id=business.business_id) }}">Limpar</a>
+                </div>
+            </form>
 
             {% if appointments %}
             <div class="table-responsive">
@@ -49,12 +77,14 @@ Painel do Prestador - {{ business.business_name }}
                     <tbody>
                         {% for app in appointments %}
                         <tr>
-                            <td class="fw-semibold">{{ app.date }}</td>
+                            <td class="fw-semibold">{{ app.date }} {{ app.appointment_time or '' }}</td>
                             <td>{{ app.service_name }}</td>
                             <td>{{ app.client_name }} {{ app.client_surename }}</td>
                             <td>
                                 {% if app.status == 'cancelled' %}
                                 <span class="badge bg-danger bg-opacity-10 text-danger fw-semibold">Cancelado</span>
+                                {% elif app.status == 'requested' %}
+                                <span class="badge bg-warning bg-opacity-10 text-warning fw-semibold">Solicitado</span>
                                 {% elif app.status == 'confirmed' %}
                                 <span class="badge bg-success bg-opacity-10 text-success fw-semibold">Confirmado</span>
                                 {% else %}
@@ -63,7 +93,13 @@ Painel do Prestador - {{ business.business_name }}
                                 {% endif %}
                             </td>
                             <td class="text-end">
-                                {% if app.status != 'cancelled' %}
+                                {% if app.status == 'requested' %}
+                                <form action="{{ url_for('business.confirm_appointment', appointment_id=app.appointment_id) }}"
+                                    method="post" class="d-inline">
+                                    <button type="submit" class="btn btn-outline-success btn-sm">Confirmar</button>
+                                </form>
+                                {% endif %}
+                                {% if app.status in ('requested', 'confirmed') %}
                                 <form action="/business/appointment/{{ app.appointment_id }}/cancel" method="post"
                                     onsubmit="return confirm('Deseja realmente cancelar este agendamento?');"
                                     class="d-inline">
@@ -80,6 +116,23 @@ Painel do Prestador - {{ business.business_name }}
                     </tbody>
                 </table>
             </div>
+            {% if total_pages > 1 %}
+            <nav class="mt-3" aria-label="Páginas da agenda do prestador">
+                <ul class="pagination pagination-sm justify-content-center flex-wrap mb-0">
+                    <li class="page-item {% if current_page == 1 %}disabled{% endif %}">
+                        {% if current_page > 1 %}
+                        <a class="page-link" href="{{ url_for('business.provider_view', business_id=business.business_id, status=status_filter, service_id=service_filter or '', order=sort_order, page=current_page - 1) }}">Anterior</a>
+                        {% else %}<span class="page-link">Anterior</span>{% endif %}
+                    </li>
+                    <li class="page-item disabled"><span class="page-link">Página {{ current_page }} de {{ total_pages }}</span></li>
+                    <li class="page-item {% if current_page == total_pages %}disabled{% endif %}">
+                        {% if current_page < total_pages %}
+                        <a class="page-link" href="{{ url_for('business.provider_view', business_id=business.business_id, status=status_filter, service_id=service_filter or '', order=sort_order, page=current_page + 1) }}">Próxima</a>
+                        {% else %}<span class="page-link">Próxima</span>{% endif %}
+                    </li>
+                </ul>
+            </nav>
+            {% endif %}
             {% else %}
             <div class="card bg-light border-0 py-4 text-center">
                 <div class="card-body">
