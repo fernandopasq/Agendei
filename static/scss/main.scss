@@ -313,3 +313,21 @@ body {
     --cat-color: #{$ctp-sky};
   }
 }
+
+.pagination {
+  --bs-pagination-color: #{$ctp-rosewater};
+  --bs-pagination-bg: #{$ctp-surface0};
+  --bs-pagination-border-color: #{$ctp-surface1};
+  --bs-pagination-hover-color: #{$ctp-surface0};
+  --bs-pagination-hover-bg: #{$ctp-rosewater};
+  --bs-pagination-hover-border-color: #{$ctp-rosewater};
+  --bs-pagination-focus-color: #{$ctp-surface0};
+  --bs-pagination-focus-bg: #{$ctp-rosewater};
+  --bs-pagination-focus-box-shadow: 0 0 0 0.25rem rgba($ctp-rosewater, 0.25);
+  --bs-pagination-active-color: #{$ctp-rosewater};
+  --bs-pagination-active-bg: #{$ctp-surface0};
+  --bs-pagination-active-border-color: #{$ctp-surface1};
+  --bs-pagination-disabled-color: #{$ctp-rosewater};
+  --bs-pagination-disabled-bg: #{$ctp-surface0};
+  --bs-pagination-disabled-border-color: #{$ctp-surface1};
+}

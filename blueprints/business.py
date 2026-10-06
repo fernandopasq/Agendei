@@ -5,6 +5,8 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from constants import BUSINESS_CATEGORIES, BUSINESS_DDDS, BRAZILIAN_STATES
 from helpers import apology, get_db, normalize_phone, normalize_street
 
+APPOINTMENT_PAGE_SIZE = 15
+
 # Definindo o Blueprint com prefixo de URL automático
 business_bp = Blueprint("business", __name__, url_prefix="/business")
 
@@ -52,7 +54,7 @@ def business_landing():
     cursor.execute("""
         SELECT COUNT(*) AS total
         FROM appointment
-        WHERE status != 'cancelled'
+        WHERE status IN ('requested', 'confirmed')
     """)
     appointment_count = cursor.fetchone()["total"]
     conn.close()
@@ -357,6 +359,14 @@ def manage_business(business_id):
     user_id = session.get("user_id")
     conn = get_db()
     cursor = conn.cursor()
+    status_filter = request.args.get("status", "")
+    if status_filter not in {"", "pending", "confirmed", "cancelled", "completed"}:
+        status_filter = ""
+    service_filter = request.args.get("service_id", type=int)
+    provider_filter = request.args.get("provider_id", type=int)
+    sort_order = request.args.get("order", "asc")
+    if sort_order not in {"asc", "desc"}:
+        sort_order = "asc"
 
     # Confirma se o usuário é o proprietário
     cursor.execute("SELECT * FROM business WHERE business_id = ? AND owner_id = ?", (business_id, user_id))
@@ -389,21 +399,64 @@ def manage_business(business_id):
     """, (business_id,))
     services = cursor.fetchall()
 
-    # B) Agendamentos do local
     cursor.execute("""
+        SELECT DISTINCT u.user_id, u.name, u.surename
+        FROM appointment a
+        JOIN users u ON u.user_id = a.provider_id
+        JOIN services s ON s.service_id = a.service_id
+        WHERE s.business_id = ?
+        ORDER BY u.name, u.surename
+    """, (business_id,))
+    appointment_providers = cursor.fetchall()
+
+    # B) Agendamentos do local
+    appointment_query = """
         SELECT 
-            a.appointment_id, a.date, a.status,
+            a.appointment_id, a.date, a.appointment_time, a.status,
             client.name AS client_name, client.surename AS client_surename,
+            provider.user_id AS provider_id,
             provider.name AS provider_name, provider.surename AS provider_surename,
             s.name AS service_name
         FROM appointment a
         JOIN users client ON a.user_id = client.user_id
         JOIN users provider ON a.provider_id = provider.user_id
         JOIN services s ON a.service_id = s.service_id
-                WHERE s.business_id = ?
-                    AND a.status NOT IN ('cancelled', 'completed')
-        ORDER BY a.date ASC
-    """, (business_id,))
+        WHERE s.business_id = ?
+    """
+    appointment_params = [business_id]
+    if status_filter == "pending":
+        appointment_query += " AND a.status IN ('requested', 'pending')"
+    elif status_filter:
+        appointment_query += " AND a.status = ?"
+        appointment_params.append(status_filter)
+    if service_filter:
+        appointment_query += " AND s.service_id = ?"
+        appointment_params.append(service_filter)
+    if provider_filter:
+        appointment_query += " AND a.provider_id = ?"
+        appointment_params.append(provider_filter)
+    count_query = (
+        "SELECT COUNT(*) "
+        + appointment_query[appointment_query.index("FROM appointment a"):]
+    )
+    cursor.execute(count_query, appointment_params)
+    total_appointments = cursor.fetchone()[0]
+    total_pages = max(
+        1,
+        (total_appointments + APPOINTMENT_PAGE_SIZE - 1) // APPOINTMENT_PAGE_SIZE
+    )
+    current_page = request.args.get("page", 1, type=int)
+    current_page = min(max(current_page, 1), total_pages)
+    appointment_query += (
+        f" ORDER BY a.date {sort_order.upper()}, "
+        f"a.appointment_time {sort_order.upper()}, "
+        f"a.appointment_id {sort_order.upper()} LIMIT ? OFFSET ?"
+    )
+    appointment_params.extend([
+        APPOINTMENT_PAGE_SIZE,
+        (current_page - 1) * APPOINTMENT_PAGE_SIZE
+    ])
+    cursor.execute(appointment_query, appointment_params)
     appointments = cursor.fetchall()
 
     # C) Solicitações Pendentes de Prestadores
@@ -432,8 +485,107 @@ def manage_business(business_id):
         is_self_provider=is_self_provider,
         services=services,
         appointments=appointments,
+        appointment_providers=appointment_providers,
+        status_filter=status_filter,
+        service_filter=service_filter,
+        provider_filter=provider_filter,
+        sort_order=sort_order,
+        current_page=current_page,
+        total_pages=total_pages,
+        total_appointments=total_appointments,
+        page_size=APPOINTMENT_PAGE_SIZE,
         pending_requests=pending_requests,
         active_members=active_members
+    )
+
+
+@business_bp.route("/manage/<int:business_id>/delete", methods=["GET", "POST"])
+def delete_business(business_id):
+    user_id = session.get("user_id")
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute(
+        "SELECT business_name FROM business WHERE business_id = ? AND owner_id = ?",
+        (business_id, user_id)
+    )
+    business = cursor.fetchone()
+    if not business:
+        conn.close()
+        return apology("Estabelecimento não encontrado ou acesso não autorizado.", 403)
+
+    if request.method == "POST":
+        if request.form.get("confirm") != "yes":
+            flash("Confirme que entende que a exclusão é permanente.", "warning")
+            conn.close()
+            return redirect(url_for("business.delete_business", business_id=business_id))
+
+        business_missing = False
+        with conn:
+            conn.execute("BEGIN IMMEDIATE")
+            cursor = conn.cursor()
+            cursor.execute(
+                "SELECT 1 FROM business WHERE business_id = ? AND owner_id = ?",
+                (business_id, user_id)
+            )
+            if not cursor.fetchone():
+                business_missing = True
+            else:
+                cursor.execute("""
+                    DELETE FROM appointment
+                    WHERE service_id IN (
+                        SELECT service_id FROM services WHERE business_id = ?
+                    )
+                """, (business_id,))
+                cursor.execute("DELETE FROM provider_services WHERE business_id = ?", (business_id,))
+                cursor.execute("DELETE FROM business_providers WHERE business_id = ?", (business_id,))
+                cursor.execute("DELETE FROM services WHERE business_id = ?", (business_id,))
+                cursor.execute(
+                    "DELETE FROM business WHERE business_id = ? AND owner_id = ?",
+                    (business_id, user_id)
+                )
+
+        conn.close()
+        if business_missing:
+            return apology("Estabelecimento não encontrado ou acesso não autorizado.", 403)
+        flash("Estabelecimento e todos os dados vinculados foram excluídos.", "success")
+        return redirect(url_for("business.home"))
+
+    cursor.execute(
+        "SELECT COUNT(*) AS total FROM services WHERE business_id = ?",
+        (business_id,)
+    )
+    service_count = cursor.fetchone()["total"]
+    cursor.execute("""
+        SELECT COUNT(*) AS total
+        FROM appointment a
+        JOIN services s ON s.service_id = a.service_id
+        WHERE s.business_id = ?
+    """, (business_id,))
+    appointment_count = cursor.fetchone()["total"]
+    cursor.execute(
+        "SELECT COUNT(*) AS total FROM business_providers WHERE business_id = ?",
+        (business_id,)
+    )
+    provider_count = cursor.fetchone()["total"]
+    cursor.execute(
+        "SELECT COUNT(*) AS total FROM provider_services WHERE business_id = ?",
+        (business_id,)
+    )
+    provider_service_count = cursor.fetchone()["total"]
+    conn.close()
+
+    return render_template(
+        "business-delete-confirm.html",
+        title="Excluir estabelecimento",
+        description=f"O estabelecimento “{business['business_name']}” e os dados abaixo serão removidos:",
+        items=[
+            ("Serviços", service_count),
+            ("Agendamentos desses serviços", appointment_count),
+            ("Vínculos de prestadores", provider_count),
+            ("Associações entre prestadores e serviços", provider_service_count),
+        ],
+        cancel_url=url_for("business.manage_business", business_id=business_id),
+        submit_label="Excluir estabelecimento",
     )
 
 
@@ -507,6 +659,13 @@ def provider_view(business_id):
     user_id = session.get("user_id")
     conn = get_db()
     cursor = conn.cursor()
+    status_filter = request.args.get("status", "")
+    if status_filter not in {"", "pending", "confirmed", "cancelled", "completed"}:
+        status_filter = ""
+    service_filter = request.args.get("service_id", type=int)
+    sort_order = request.args.get("order", "asc")
+    if sort_order not in {"asc", "desc"}:
+        sort_order = "asc"
 
     # Confirma se o usuário é prestador ativo deste local (ou proprietário ativo)
     cursor.execute("""
@@ -520,10 +679,10 @@ def provider_view(business_id):
         conn.close()
         return apology("Você não faz parte da equipe de prestadores deste estabelecimento.", 403)
 
-    # Agendamentos do PRESTADOR LOGADO neste estabelecimento (ordenados por data)
-    cursor.execute("""
+    # Agendamentos do prestador logado, com filtros opcionais
+    appointment_query = """
         SELECT 
-            a.appointment_id, a.date, a.status,
+            a.appointment_id, a.date, a.appointment_time, a.status,
             client.name AS client_name, client.surename AS client_surename,
             provider.name AS provider_name, provider.surename AS provider_surename,
             s.name AS service_name
@@ -533,9 +692,38 @@ def provider_view(business_id):
         JOIN services s ON a.service_id = s.service_id
                 WHERE s.business_id = ?
                     AND a.provider_id = ?
-                    AND a.status NOT IN ('cancelled', 'completed')
-        ORDER BY a.date ASC
-    """, (business_id, user_id))
+    """
+    appointment_params = [business_id, user_id]
+    if status_filter == "pending":
+        appointment_query += " AND a.status IN ('requested', 'pending')"
+    elif status_filter:
+        appointment_query += " AND a.status = ?"
+        appointment_params.append(status_filter)
+    if service_filter:
+        appointment_query += " AND s.service_id = ?"
+        appointment_params.append(service_filter)
+    count_query = (
+        "SELECT COUNT(*) "
+        + appointment_query[appointment_query.index("FROM appointment a"):]
+    )
+    cursor.execute(count_query, appointment_params)
+    total_appointments = cursor.fetchone()[0]
+    total_pages = max(
+        1,
+        (total_appointments + APPOINTMENT_PAGE_SIZE - 1) // APPOINTMENT_PAGE_SIZE
+    )
+    current_page = request.args.get("page", 1, type=int)
+    current_page = min(max(current_page, 1), total_pages)
+    appointment_query += (
+        f" ORDER BY a.date {sort_order.upper()}, "
+        f"a.appointment_time {sort_order.upper()}, "
+        f"a.appointment_id {sort_order.upper()} LIMIT ? OFFSET ?"
+    )
+    appointment_params.extend([
+        APPOINTMENT_PAGE_SIZE,
+        (current_page - 1) * APPOINTMENT_PAGE_SIZE
+    ])
+    cursor.execute(appointment_query, appointment_params)
     appointments = cursor.fetchall()
 
     # Busca TODOS os serviços do estabelecimento e indica (1 ou 0) se o prestador atende cada um
@@ -559,7 +747,14 @@ def provider_view(business_id):
         "business-provider-view.html",
         business=business,
         appointments=appointments,
-        services=services
+        services=services,
+        status_filter=status_filter,
+        service_filter=service_filter,
+        sort_order=sort_order,
+        current_page=current_page,
+        total_pages=total_pages,
+        total_appointments=total_appointments,
+        page_size=APPOINTMENT_PAGE_SIZE
     )
 
 
@@ -570,15 +765,105 @@ def cancel_appointment(appointment_id):
     conn = get_db()
     cursor = conn.cursor()
 
-    cursor.execute(
-        "UPDATE appointment SET status = 'cancelled' WHERE appointment_id = ? AND (provider_id = ? OR user_id = ?)",
-        (appointment_id, user_id, user_id)
-    )
+    cursor.execute("""
+        SELECT a.provider_id, s.business_id, b.owner_id
+        FROM appointment a
+        JOIN services s ON s.service_id = a.service_id
+        JOIN business b ON b.business_id = s.business_id
+        WHERE a.appointment_id = ?
+    """, (appointment_id,))
+    appointment = cursor.fetchone()
+    if not appointment:
+        conn.close()
+        return apology("Agendamento não encontrado.", 404)
+
+    is_owner = appointment["owner_id"] == user_id
+    is_assigned_provider = appointment["provider_id"] == user_id
+    if is_assigned_provider and not is_owner:
+        cursor.execute("""
+            SELECT 1 FROM business_providers
+            WHERE business_id = ? AND user_id = ? AND status = 'active'
+        """, (appointment["business_id"], user_id))
+        is_assigned_provider = cursor.fetchone() is not None
+    if not is_owner and not is_assigned_provider:
+        conn.close()
+        return apology("Você não tem permissão para cancelar este agendamento.", 403)
+
+    cursor.execute("""
+        UPDATE appointment
+        SET status = 'cancelled'
+        WHERE appointment_id = ? AND status IN ('requested', 'confirmed')
+    """, (appointment_id,))
+    changed = cursor.rowcount
     conn.commit()
     conn.close()
 
-    flash("Agendamento cancelado.", "info")
-    return redirect(request.referrer or url_for("business.home"))
+    if changed:
+        flash("Agendamento cancelado.", "info")
+    else:
+        flash("Este agendamento não pode mais ser cancelado.", "warning")
+    if is_owner:
+        return redirect(url_for(
+            "business.manage_business",
+            business_id=appointment["business_id"]
+        ))
+    return redirect(url_for(
+        "business.provider_view",
+        business_id=appointment["business_id"]
+    ))
+
+
+@business_bp.route("/appointment/<int:appointment_id>/confirm", methods=["POST"])
+def confirm_appointment(appointment_id):
+    user_id = session.get("user_id")
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT a.provider_id, s.business_id, b.owner_id
+        FROM appointment a
+        JOIN services s ON s.service_id = a.service_id
+        JOIN business b ON b.business_id = s.business_id
+        WHERE a.appointment_id = ?
+    """, (appointment_id,))
+    appointment = cursor.fetchone()
+    if not appointment:
+        conn.close()
+        return apology("Agendamento não encontrado.", 404)
+
+    is_owner = appointment["owner_id"] == user_id
+    is_assigned_provider = appointment["provider_id"] == user_id
+    if is_assigned_provider and not is_owner:
+        cursor.execute("""
+            SELECT 1 FROM business_providers
+            WHERE business_id = ? AND user_id = ? AND status = 'active'
+        """, (appointment["business_id"], user_id))
+        is_assigned_provider = cursor.fetchone() is not None
+    if not is_owner and not is_assigned_provider:
+        conn.close()
+        return apology("Você não tem permissão para confirmar este agendamento.", 403)
+
+    cursor.execute("""
+        UPDATE appointment
+        SET status = 'confirmed'
+        WHERE appointment_id = ? AND status = 'requested'
+    """, (appointment_id,))
+    changed = cursor.rowcount
+    conn.commit()
+    conn.close()
+
+    if changed:
+        flash("Solicitação de agendamento confirmada.", "success")
+    else:
+        flash("Esta solicitação não está mais pendente.", "warning")
+    if is_owner:
+        return redirect(url_for(
+            "business.manage_business",
+            business_id=appointment["business_id"]
+        ))
+    return redirect(url_for(
+        "business.provider_view",
+        business_id=appointment["business_id"]
+    ))
 
 
 # Aprovar Solicitação
@@ -615,24 +900,134 @@ def reject_provider(business_id, provider_user_id):
     conn = get_db()
     cursor = conn.cursor()
 
-    # Verifica permissão do dono
-    cursor.execute("SELECT owner_id FROM business WHERE business_id = ?", (business_id,))
+    cursor.execute(
+        "SELECT owner_id FROM business WHERE business_id = ?",
+        (business_id,)
+    )
     business = cursor.fetchone()
 
     if not business or business["owner_id"] != user_id:
         conn.close()
         return apology("Ação não autorizada.", 403)
 
-    # Remove o registro via chave composta
     cursor.execute(
-        "DELETE FROM business_providers WHERE business_id = ? AND user_id = ?",
+        "SELECT status FROM business_providers WHERE business_id = ? AND user_id = ?",
         (business_id, provider_user_id)
     )
-    conn.commit()
+    provider = cursor.fetchone()
+    if not provider:
+        conn.close()
+        flash("Vínculo de prestador não encontrado.", "warning")
+        return redirect(url_for("business.manage_business", business_id=business_id))
+    if provider_user_id == user_id:
+        conn.close()
+        return apology("O proprietário não pode ser removido da própria equipe.", 400)
+    conn.close()
+    return redirect(url_for(
+        "business.remove_provider",
+        business_id=business_id,
+        provider_user_id=provider_user_id
+    ))
+
+
+@business_bp.route(
+    "/manage/<int:business_id>/provider/<int:provider_user_id>/remove",
+    methods=["GET", "POST"]
+)
+def remove_provider(business_id, provider_user_id):
+    user_id = session.get("user_id")
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT u.name, u.surename, b.owner_id
+        FROM business_providers bp
+        JOIN users u ON u.user_id = bp.user_id
+        JOIN business b ON b.business_id = bp.business_id
+        WHERE bp.business_id = ? AND bp.user_id = ?
+    """, (business_id, provider_user_id))
+    provider = cursor.fetchone()
+    if not provider or provider["owner_id"] != user_id:
+        conn.close()
+        return apology("Prestador não encontrado ou acesso não autorizado.", 403)
+    if provider_user_id == user_id:
+        conn.close()
+        return apology("O proprietário não pode ser removido da própria equipe.", 400)
+
+    if request.method == "POST":
+        if request.form.get("confirm") != "yes":
+            flash("Confirme que entende que os agendamentos serão removidos.", "warning")
+            conn.close()
+            return redirect(url_for(
+                "business.remove_provider",
+                business_id=business_id,
+                provider_user_id=provider_user_id
+            ))
+
+        provider_missing = False
+        with conn:
+            conn.execute("BEGIN IMMEDIATE")
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT bp.user_id
+                FROM business_providers bp
+                JOIN business b ON b.business_id = bp.business_id
+                WHERE bp.business_id = ? AND bp.user_id = ?
+                  AND b.owner_id = ? AND bp.user_id != b.owner_id
+            """, (business_id, provider_user_id, user_id))
+            if not cursor.fetchone():
+                provider_missing = True
+            else:
+                cursor.execute("""
+                    DELETE FROM appointment
+                    WHERE provider_id = ?
+                      AND service_id IN (
+                          SELECT service_id FROM services WHERE business_id = ?
+                      )
+                """, (provider_user_id, business_id))
+                cursor.execute(
+                    "DELETE FROM provider_services WHERE business_id = ? AND user_id = ?",
+                    (business_id, provider_user_id)
+                )
+                cursor.execute(
+                    "DELETE FROM business_providers WHERE business_id = ? AND user_id = ?",
+                    (business_id, provider_user_id)
+                )
+
+        conn.close()
+        if provider_missing:
+            return apology("Prestador não encontrado ou acesso não autorizado.", 403)
+        flash("Prestador e seus agendamentos deste estabelecimento foram removidos.", "info")
+        return redirect(url_for("business.manage_business", business_id=business_id))
+
+    cursor.execute("""
+        SELECT COUNT(*) AS total
+        FROM appointment a
+        JOIN services s ON s.service_id = a.service_id
+        WHERE a.provider_id = ? AND s.business_id = ?
+    """, (provider_user_id, business_id))
+    appointment_count = cursor.fetchone()["total"]
+    cursor.execute("""
+        SELECT COUNT(*) AS total
+        FROM provider_services
+        WHERE business_id = ? AND user_id = ?
+    """, (business_id, provider_user_id))
+    service_count = cursor.fetchone()["total"]
     conn.close()
 
-    flash("Solicitação/membro removido.", "info")
-    return redirect(url_for("business.manage_business", business_id=business_id))
+    return render_template(
+        "business-delete-confirm.html",
+        title="Remover prestador",
+        description=(
+            f"{provider['name']} {provider['surename']} será removido da equipe "
+            "deste estabelecimento. A conta e os outros vínculos dele serão mantidos."
+        ),
+        items=[
+            ("Agendamentos com este prestador neste estabelecimento", appointment_count),
+            ("Associações do prestador a serviços", service_count),
+        ],
+        cancel_url=url_for("business.manage_business", business_id=business_id),
+        submit_label="Remover prestador",
+    )
 
 
 # Alternar vínculo do proprietário como prestador no próprio estabelecimento
@@ -789,26 +1184,81 @@ def create_service(business_id):
 
 
 # Excluir serviço
-@business_bp.route("/manage/<int:business_id>/service/<int:service_id>/delete", methods=["POST"])
+@business_bp.route("/manage/<int:business_id>/service/<int:service_id>/delete", methods=["GET", "POST"])
 def delete_service(business_id, service_id):
     user_id = session.get("user_id")
     conn = get_db()
     cursor = conn.cursor()
 
-    # Confirma permissão
-    cursor.execute("SELECT owner_id FROM business WHERE business_id = ?", (business_id,))
-    business = cursor.fetchone()
-
-    if not business or business["owner_id"] != user_id:
+    cursor.execute("""
+        SELECT s.name
+        FROM services s
+        JOIN business b ON b.business_id = s.business_id
+        WHERE s.service_id = ? AND s.business_id = ? AND b.owner_id = ?
+    """, (service_id, business_id, user_id))
+    service = cursor.fetchone()
+    if not service:
         conn.close()
-        return apology("Ação não autorizada.", 403)
+        return apology("Serviço não encontrado ou acesso não autorizado.", 403)
 
-    cursor.execute("DELETE FROM services WHERE service_id = ? AND business_id = ?", (service_id, business_id))
-    conn.commit()
+    if request.method == "POST":
+        if request.form.get("confirm") != "yes":
+            flash("Confirme que entende que a exclusão é permanente.", "warning")
+            conn.close()
+            return redirect(url_for(
+                "business.delete_service",
+                business_id=business_id,
+                service_id=service_id
+            ))
+
+        service_missing = False
+        with conn:
+            conn.execute("BEGIN IMMEDIATE")
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT 1 FROM services s
+                JOIN business b ON b.business_id = s.business_id
+                WHERE s.service_id = ? AND s.business_id = ? AND b.owner_id = ?
+            """, (service_id, business_id, user_id))
+            if not cursor.fetchone():
+                service_missing = True
+            else:
+                cursor.execute("DELETE FROM appointment WHERE service_id = ?", (service_id,))
+                cursor.execute("DELETE FROM provider_services WHERE service_id = ?", (service_id,))
+                cursor.execute(
+                    "DELETE FROM services WHERE service_id = ? AND business_id = ?",
+                    (service_id, business_id)
+                )
+
+        conn.close()
+        if service_missing:
+            return apology("Serviço não encontrado ou acesso não autorizado.", 403)
+        flash("Serviço e agendamentos vinculados foram removidos.", "info")
+        return redirect(url_for("business.manage_business", business_id=business_id))
+
+    cursor.execute(
+        "SELECT COUNT(*) AS total FROM appointment WHERE service_id = ?",
+        (service_id,)
+    )
+    appointment_count = cursor.fetchone()["total"]
+    cursor.execute(
+        "SELECT COUNT(*) AS total FROM provider_services WHERE service_id = ?",
+        (service_id,)
+    )
+    provider_count = cursor.fetchone()["total"]
     conn.close()
 
-    flash("Serviço removido com sucesso.", "info")
-    return redirect(url_for("business.manage_business", business_id=business_id))
+    return render_template(
+        "business-delete-confirm.html",
+        title="Remover serviço",
+        description=f"O serviço “{service['name']}” e os dados abaixo serão removidos:",
+        items=[
+            ("Agendamentos", appointment_count),
+            ("Associações de prestadores ao serviço", provider_count),
+        ],
+        cancel_url=url_for("business.manage_business", business_id=business_id),
+        submit_label="Remover serviço",
+    )
 
 # Formulário e ação de seleção de serviços do prestador
 @business_bp.route("/view/<int:business_id>/services", methods=["GET", "POST"])
