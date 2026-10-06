@@ -267,41 +267,60 @@
         const container = document.getElementById('staff-container');
         container.innerHTML = '';
 
-        let html = `
-            <div class="col-12 col-md-6">
-                <div class="card border p-3 selection-btn" onclick="selectStaff('any', 'Qualquer Profissional (Qualquer um disponível)')" style="cursor: pointer;">
-                    <div class="d-flex align-items-center gap-3">
-                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
-                            <i class="bi bi-shuffle"></i>
-                        </div>
-                        <div>
-                            <h4 class="h6 fw-bold mb-0">Qualquer Profissional</h4>
-                            <small class="text-muted">Mostra todos os horários livres</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
+        const addStaffOption = (staffId, name, role, profileImageId, isAny = false) => {
+            const column = document.createElement('div');
+            column.className = 'col-12 col-md-6';
+            const card = document.createElement('div');
+            card.className = 'card border p-3 selection-btn';
+            card.style.cursor = 'pointer';
+            card.setAttribute('role', 'button');
+            card.tabIndex = 0;
 
-        staffList.forEach(st => {
-            html += `
-                <div class="col-12 col-md-6">
-                    <div class="card border p-3 selection-btn" onclick="selectStaff('${st.staff_id}', '${st.name}')" style="cursor: pointer;">
-                        <div class="d-flex align-items-center gap-3">
-                            <div class="bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
-                                <i class="bi bi-person"></i>
-                            </div>
-                            <div>
-                                <h4 class="h6 fw-bold mb-0">${st.name}</h4>
-                                <small class="text-muted">${st.role || 'Profissional'}</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-        });
+            const row = document.createElement('div');
+            row.className = 'd-flex align-items-center gap-3';
+            let avatar;
+            if (!isAny && profileImageId) {
+                avatar = document.createElement('img');
+                avatar.className = 'staff-avatar';
+                avatar.src = `/images/${Number(profileImageId)}`;
+                avatar.alt = `Foto de ${name}`;
+            } else {
+                avatar = document.createElement('div');
+                avatar.className = `staff-avatar staff-avatar-placeholder${isAny ? ' bg-primary text-white' : ''}`;
+                avatar.setAttribute('aria-hidden', 'true');
+                const icon = document.createElement('i');
+                icon.className = `bi ${isAny ? 'bi-shuffle' : 'bi-person-fill'}`;
+                avatar.appendChild(icon);
+            }
 
-        container.innerHTML = html;
+            const details = document.createElement('div');
+            const title = document.createElement('h4');
+            title.className = 'h6 fw-bold mb-0';
+            title.textContent = name;
+            const subtitle = document.createElement('small');
+            subtitle.className = 'text-muted';
+            subtitle.textContent = role;
+            details.append(title, subtitle);
+            row.append(avatar, details);
+            card.appendChild(row);
+            card.addEventListener('click', () => selectStaff(staffId, name));
+            card.addEventListener('keydown', event => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    selectStaff(staffId, name);
+                }
+            });
+            column.appendChild(card);
+            container.appendChild(column);
+        };
+
+        addStaffOption('any', 'Qualquer Profissional', 'Mostra todos os horários livres', null, true);
+        staffList.forEach(st => addStaffOption(
+            String(st.staff_id),
+            st.name,
+            st.role || 'Profissional',
+            st.profile_image_id
+        ));
     }
 
     function selectStaff(id, name) {

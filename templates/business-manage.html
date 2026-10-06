@@ -13,7 +13,7 @@
             <p class="text-muted mb-0">{{ business.street }}, {{ business.number }} - {{ business.neighborhood }}, {{
                 business.city }}/{{ business.state }}</p>
             <a href="/business/manage/{{ business.business_id }}/edit" class="btn btn-outline-primary btn-sm mt-2">
-                <i class="bi bi-pencil me-1"></i>Editar Estabelecimento
+                <i class="bi bi-pencil me-1"></i>Editar dados
             </a>
             <a href="{{ url_for('business.delete_business', business_id=business.business_id) }}"
                 class="btn btn-outline-danger btn-sm mt-2">
@@ -21,6 +21,8 @@
             </a>
         </div>
     </div>
+
+    {% include "business-media-dashboard.html" %}
 
         <!-- MÓDULO 1: Equipe de Atendimento -->
     <div class="card border-0 shadow-sm mb-4">

@@ -8,6 +8,7 @@ env/
 
 *.db
 flask_session/
+instance/uploads/
 
 .env
 .env.*

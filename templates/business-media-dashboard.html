@@ -1,0 +1,210 @@
+<section class="mb-4">
+    <div class="position-relative">
+        {% if banner_image %}
+        <img src="{{ url_for('serve_image', image_id=banner_image.image_id) }}"
+            class="business-page-banner" alt="Banner de {{ business.business_name }}">
+        {% else %}
+        <div class="business-page-banner image-banner-placeholder d-flex align-items-center justify-content-center">
+            <i class="bi bi-building" aria-hidden="true"></i>
+            <span class="visually-hidden">Sem imagem de banner</span>
+        </div>
+        {% endif %}
+        <button class="btn btn-light shadow-sm position-absolute top-0 end-0 m-3"
+            type="button" data-bs-toggle="modal" data-bs-target="#editBusinessBannerModal">
+            <i class="bi bi-pencil me-1"></i>Editar banner
+        </button>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center gap-3 mt-3 mb-2">
+        <div>
+            <h2 class="h5 fw-bold mb-0">Galeria do estabelecimento</h2>
+            <p class="small text-muted mb-0">Clique em uma foto para ampliar.</p>
+        </div>
+        <button class="btn btn-outline-primary btn-sm" type="button"
+            data-bs-toggle="modal" data-bs-target="#editBusinessGalleryModal">
+            <i class="bi bi-images me-1"></i>Editar galeria
+        </button>
+    </div>
+
+    {% if gallery_images %}
+    <div id="businessManagementGallery" class="carousel slide business-gallery-carousel"
+        data-bs-ride="false" aria-label="Galeria de {{ business.business_name }}">
+        <div class="carousel-inner rounded">
+            {% for image in gallery_images %}
+            <div class="carousel-item {% if loop.first %}active{% endif %}">
+                <button class="gallery-zoom-trigger" type="button"
+                    data-bs-toggle="modal" data-bs-target="#businessGalleryPreview"
+                    data-gallery-src="{{ url_for('serve_image', image_id=image.image_id) }}"
+                    data-gallery-alt="Foto {{ loop.index }} de {{ business.business_name }}">
+                    <img src="{{ url_for('serve_image', image_id=image.image_id) }}"
+                        class="business-gallery-slide" alt="Foto {{ loop.index }} de {{ business.business_name }}">
+                    <span class="visually-hidden">Ampliar foto {{ loop.index }}</span>
+                </button>
+            </div>
+            {% endfor %}
+        </div>
+        {% if gallery_images|length > 1 %}
+        <button class="carousel-control-prev" type="button" data-bs-target="#businessManagementGallery"
+            data-bs-slide="prev" aria-label="Foto anterior">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#businessManagementGallery"
+            data-bs-slide="next" aria-label="Próxima foto">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        </button>
+        {% endif %}
+    </div>
+    {% else %}
+    <button class="business-gallery-empty w-100 rounded border-0"
+        type="button" data-bs-toggle="modal" data-bs-target="#editBusinessGalleryModal">
+        <i class="bi bi-images display-6 d-block mb-2"></i>
+        Adicione fotos para apresentar o estabelecimento
+    </button>
+    {% endif %}
+</section>
+
+<div class="modal fade" id="editBusinessBannerModal" tabindex="-1"
+    aria-labelledby="editBusinessBannerTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title h5 fw-bold" id="editBusinessBannerTitle">Editar banner</h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+                <p class="small text-muted">Imagem recomendada: 1200 × 600 px (proporção 2:1).</p>
+                <form method="post"
+                    action="{{ url_for('business.upload_business_image', business_id=business.business_id) }}"
+                    enctype="multipart/form-data" data-image-crop-form>
+                    <input type="hidden" name="role" value="banner">
+                    <label class="btn btn-outline-primary mb-3" for="management-banner-file">
+                        <i class="bi bi-upload me-1"></i>Escolher banner
+                    </label>
+                    <input class="visually-hidden" type="file" id="management-banner-file" name="image"
+                        accept="image/jpeg,image/png,image/webp" required data-crop-file>
+                    <div class="image-crop-controls d-none" data-crop-controls>
+                        <div class="image-crop-preview rounded" style="aspect-ratio: 2 / 1;"
+                            data-crop-preview>
+                            <img alt="Pré-visualização do corte do banner" data-crop-preview-image>
+                        </div>
+                        <div class="row g-2 mt-2">
+                            <div class="col-4">
+                                <label class="form-label small mb-1" for="management-banner-x">Horizontal</label>
+                                <input class="form-range" id="management-banner-x" type="range" min="0" max="1"
+                                    step="0.01" value="0.5" name="crop_x" data-crop-x>
+                            </div>
+                            <div class="col-4">
+                                <label class="form-label small mb-1" for="management-banner-y">Vertical</label>
+                                <input class="form-range" id="management-banner-y" type="range" min="0" max="1"
+                                    step="0.01" value="0.5" name="crop_y" data-crop-y>
+                            </div>
+                            <div class="col-4">
+                                <label class="form-label small mb-1" for="management-banner-zoom">Zoom</label>
+                                <input class="form-range" id="management-banner-zoom" type="range" min="1" max="3"
+                                    step="0.05" value="1" name="crop_zoom" data-crop-zoom>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary mt-2" type="submit">
+                            <i class="bi bi-cloud-arrow-up me-1"></i>Enviar banner
+                        </button>
+                    </div>
+                </form>
+                {% if banner_image %}
+                <form class="mt-3" method="post"
+                    action="{{ url_for('business.remove_business_image', business_id=business.business_id, image_id=banner_image.image_id) }}"
+                    onsubmit="return confirm('Remover o banner deste estabelecimento?');">
+                    <button class="btn btn-outline-danger btn-sm" type="submit">Remover banner</button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="editBusinessGalleryModal" tabindex="-1"
+    aria-labelledby="editBusinessGalleryTitle" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title h5 fw-bold" id="editBusinessGalleryTitle">Editar galeria</h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post"
+                    action="{{ url_for('business.upload_business_image', business_id=business.business_id) }}"
+                    enctype="multipart/form-data">
+                    <input type="hidden" name="role" value="gallery">
+                    <label for="management-gallery-files" class="form-label fw-semibold">
+                        Adicionar várias imagens (JPEG, PNG ou WebP; até 8 MB por imagem)
+                    </label>
+                    <div class="input-group mb-2">
+                        <input class="form-control" type="file" id="management-gallery-files" name="images"
+                            accept="image/jpeg,image/png,image/webp" multiple required>
+                        <button class="btn btn-primary" type="submit">
+                            <i class="bi bi-cloud-arrow-up me-1"></i>Enviar imagens
+                        </button>
+                    </div>
+                    <p class="small text-muted">As imagens da galeria não são recortadas.</p>
+                </form>
+
+                <hr>
+                <h3 class="h6 fw-bold mb-3">Imagens atuais</h3>
+                {% if gallery_images %}
+                <div class="row g-3">
+                    {% for image in gallery_images %}
+                    <div class="col-6 col-md-4 col-lg-3">
+                        <img src="{{ url_for('serve_image', image_id=image.image_id) }}"
+                            class="gallery-photo rounded mb-2" alt="Foto {{ loop.index }} da galeria">
+                        <div class="d-flex justify-content-between gap-1">
+                            <form method="post"
+                                action="{{ url_for('business.reorder_business_image', business_id=business.business_id, image_id=image.image_id, direction='up') }}">
+                                <button class="btn btn-outline-secondary btn-sm" type="submit"
+                                    aria-label="Mover foto {{ loop.index }} para esquerda"
+                                    {% if loop.first %}disabled{% endif %}>
+                                    <i class="bi bi-arrow-left"></i>
+                                </button>
+                            </form>
+                            <form method="post"
+                                action="{{ url_for('business.reorder_business_image', business_id=business.business_id, image_id=image.image_id, direction='down') }}">
+                                <button class="btn btn-outline-secondary btn-sm" type="submit"
+                                    aria-label="Mover foto {{ loop.index }} para direita"
+                                    {% if loop.last %}disabled{% endif %}>
+                                    <i class="bi bi-arrow-right"></i>
+                                </button>
+                            </form>
+                            <form method="post"
+                                action="{{ url_for('business.remove_business_image', business_id=business.business_id, image_id=image.image_id) }}"
+                                onsubmit="return confirm('Remover esta imagem da galeria?');">
+                                <button class="btn btn-outline-danger btn-sm" type="submit"
+                                    aria-label="Remover foto {{ loop.index }}">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-muted mb-0">Ainda não há imagens na galeria.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if gallery_images %}
+<div class="modal fade" id="businessGalleryPreview" tabindex="-1"
+    aria-label="Imagem ampliada" aria-hidden="true" data-gallery-modal>
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content bg-dark">
+            <div class="modal-header border-0">
+                <button type="button" class="btn-close btn-close-white ms-auto"
+                    data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body pt-0 text-center">
+                <img class="gallery-lightbox-image" alt="" data-gallery-modal-image>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}

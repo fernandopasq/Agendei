@@ -65,6 +65,7 @@ def get_db():
         g.db.row_factory = sqlite3.Row
         _ensure_booking_columns(g.db)
         _ensure_contact_columns(g.db)
+        _ensure_image_assets(g.db)
         _mark_past_appointments_completed(g.db)
     return g.db
 
@@ -115,6 +116,34 @@ def _ensure_contact_columns(db):
     cursor.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_users_phone_unique ON users(phone)")
     cursor.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_business_phone_unique ON business(phone)")
 
+    db.commit()
+
+
+def _ensure_image_assets(db):
+    """Creates the local image metadata table for existing and new databases."""
+    db.execute("""
+        CREATE TABLE IF NOT EXISTS image_assets (
+            image_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            owner_type TEXT NOT NULL CHECK (owner_type IN ('user', 'business')),
+            owner_id INTEGER NOT NULL,
+            role TEXT NOT NULL CHECK (role IN ('profile', 'banner', 'gallery')),
+            storage_path TEXT UNIQUE,
+            position INTEGER NOT NULL DEFAULT 0,
+            crop_x REAL NOT NULL DEFAULT 0.5,
+            crop_y REAL NOT NULL DEFAULT 0.5,
+            crop_zoom REAL NOT NULL DEFAULT 1,
+            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+    db.execute("""
+        CREATE UNIQUE INDEX IF NOT EXISTS idx_image_assets_single_cover
+        ON image_assets (owner_type, owner_id, role)
+        WHERE role IN ('profile', 'banner')
+    """)
+    db.execute("""
+        CREATE INDEX IF NOT EXISTS idx_image_assets_owner_role_position
+        ON image_assets (owner_type, owner_id, role, position, image_id)
+    """)
     db.commit()
 
 

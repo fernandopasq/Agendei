@@ -22,8 +22,11 @@ def restrict_client_area():
     user_id = session.get("user_id")
     u_type = session.get("user_type")
 
-    # Se um parceiro (user_type == 1) tentar acessar rotas do cliente (que não seja o logout)
-    if user_id and u_type == 1 and request.endpoint != "client.logout":
+    # Keep partner accounts out of client workflows while leaving public business pages open.
+    if user_id and u_type == 1 and request.endpoint not in {
+        "client.logout",
+        "client.business_detail",
+    }:
         return redirect("/business/home")
 
 
@@ -64,18 +67,51 @@ def index():
         state: dict(cities)
         for state, cities in locations.items()
     }
+    neighborhoods_by_city = defaultdict(set)
+    for state_cities in locations.values():
+        for city, city_neighborhoods in state_cities.items():
+            neighborhoods_by_city[city].update(city_neighborhoods)
+    neighborhoods_by_city = {
+        city: sorted(city_neighborhoods)
+        for city, city_neighborhoods in neighborhoods_by_city.items()
+    }
 
     if selected_state not in locations:
         selected_state = ""
-    if selected_state and selected_city not in locations[selected_state]:
+    available_cities = (
+        set(locations[selected_state])
+        if selected_state
+        else set(neighborhoods_by_city)
+    )
+    if selected_city not in available_cities:
         selected_city = ""
-    if selected_state and selected_city and selected_neighborhood not in locations[selected_state][selected_city]:
+
+    if selected_state and selected_city:
+        available_neighborhoods = set(locations[selected_state][selected_city])
+    elif selected_city:
+        available_neighborhoods = set(neighborhoods_by_city[selected_city])
+    elif selected_state:
+        available_neighborhoods = {
+            neighborhood
+            for city_neighborhoods in locations[selected_state].values()
+            for neighborhood in city_neighborhoods
+        }
+    else:
+        available_neighborhoods = {
+            neighborhood
+            for city_neighborhoods in neighborhoods_by_city.values()
+            for neighborhood in city_neighborhoods
+        }
+    if selected_neighborhood not in available_neighborhoods:
         selected_neighborhood = ""
 
     # Monta a SQL dinâmica
     query = """
         SELECT 
             b.*,
+            (SELECT image_id FROM image_assets
+             WHERE owner_type = 'business' AND owner_id = b.business_id AND role = 'banner')
+             AS banner_image_id,
             GROUP_CONCAT(DISTINCT s.name) AS services_list
         FROM business b
         JOIN services s ON b.business_id = s.business_id
@@ -166,11 +202,82 @@ def index():
         selected_category=selected_category,
         user_name=user_name,
         locations=locations,
+        neighborhoods_by_city=neighborhoods_by_city,
         current_page=current_page,
         total_pages=total_pages,
         total_businesses=total_businesses,
         page_size=BUSINESS_PAGE_SIZE
     )
+
+
+@client_bp.route("/estabelecimento/<int:business_id>")
+def business_detail(business_id):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT b.*,
+            (SELECT image_id FROM image_assets
+             WHERE owner_type = 'business' AND owner_id = b.business_id AND role = 'banner')
+             AS banner_image_id
+        FROM business b
+        WHERE b.business_id = ?
+    """, (business_id,))
+    business = cursor.fetchone()
+    if not business:
+        conn.close()
+        return apology("Estabelecimento não encontrado.", 404)
+
+    cursor.execute("""
+        SELECT image_id, position
+        FROM image_assets
+        WHERE owner_type = 'business' AND owner_id = ? AND role = 'gallery'
+        ORDER BY position, image_id
+    """, (business_id,))
+    gallery = cursor.fetchall()
+
+    cursor.execute("""
+        SELECT s.*,
+            GROUP_CONCAT(DISTINCT TRIM(u.name || ' ' || COALESCE(u.surename, '')))
+                AS provider_names
+        FROM services s
+        LEFT JOIN provider_services ps ON ps.service_id = s.service_id
+        LEFT JOIN business_providers bp
+            ON bp.business_id = ps.business_id AND bp.user_id = ps.user_id
+           AND bp.status = 'active'
+        LEFT JOIN users u ON u.user_id = bp.user_id
+        WHERE s.business_id = ?
+        GROUP BY s.service_id
+        ORDER BY s.name
+    """, (business_id,))
+    services = cursor.fetchall()
+
+    cursor.execute("""
+        SELECT DISTINCT u.user_id, u.name, u.surename,
+            CASE WHEN u.user_id = b.owner_id THEN 'Proprietário'
+                 ELSE 'Prestador' END AS role,
+            (SELECT image_id FROM image_assets
+             WHERE owner_type = 'user' AND owner_id = u.user_id AND role = 'profile')
+             AS profile_image_id
+        FROM business b
+        JOIN users u ON u.user_id = b.owner_id
+             OR u.user_id IN (
+                 SELECT user_id FROM business_providers
+                 WHERE business_id = b.business_id AND status = 'active'
+             )
+        WHERE b.business_id = ?
+        ORDER BY role, u.name, u.surename
+    """, (business_id,))
+    providers = cursor.fetchall()
+    conn.close()
+
+    return render_template(
+        "business-detail.html",
+        business=business,
+        services=services,
+        providers=providers,
+        gallery=gallery,
+    )
+
 
 # Login de usuário
 @client_bp.route("/login", methods=["GET", "POST"])
@@ -382,7 +489,10 @@ def get_service_staff(service_id):
         SELECT DISTINCT
             u.user_id AS staff_id,
             TRIM(u.name || ' ' || COALESCE(u.surename, '')) AS name,
-            bp.role
+            bp.role,
+            (SELECT image_id FROM image_assets
+             WHERE owner_type = 'user' AND owner_id = u.user_id AND role = 'profile')
+             AS profile_image_id
         FROM provider_services ps
         JOIN business_providers bp
           ON bp.business_id = ps.business_id
@@ -401,7 +511,10 @@ def get_service_staff(service_id):
             SELECT DISTINCT
                 u.user_id AS staff_id,
                 TRIM(u.name || ' ' || COALESCE(u.surename, '')) AS name,
-                bp.role
+                bp.role,
+                (SELECT image_id FROM image_assets
+                 WHERE owner_type = 'user' AND owner_id = u.user_id AND role = 'profile')
+                 AS profile_image_id
             FROM services s
             JOIN business_providers bp ON bp.business_id = s.business_id
             JOIN users u ON u.user_id = bp.user_id

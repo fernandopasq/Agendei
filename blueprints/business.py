@@ -4,6 +4,13 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 from constants import BUSINESS_CATEGORIES, BUSINESS_DDDS, BRAZILIAN_STATES
 from helpers import apology, get_db, normalize_phone, normalize_street
+from image_storage import (
+    ImageUploadError,
+    delete_image_asset,
+    delete_owner_image_assets,
+    move_gallery_image,
+    save_image_upload,
+)
 
 APPOINTMENT_PAGE_SIZE = 15
 
@@ -477,6 +484,19 @@ def manage_business(business_id):
     """, (business_id,))
     active_members = cursor.fetchall()
 
+    cursor.execute("""
+        SELECT image_id, position
+        FROM image_assets
+        WHERE owner_type = 'business' AND owner_id = ? AND role = 'gallery'
+        ORDER BY position, image_id
+    """, (business_id,))
+    gallery_images = cursor.fetchall()
+    cursor.execute("""
+        SELECT image_id FROM image_assets
+        WHERE owner_type = 'business' AND owner_id = ? AND role = 'banner'
+    """, (business_id,))
+    banner_image = cursor.fetchone()
+
     conn.close()
 
     return render_template(
@@ -495,8 +515,116 @@ def manage_business(business_id):
         total_appointments=total_appointments,
         page_size=APPOINTMENT_PAGE_SIZE,
         pending_requests=pending_requests,
-        active_members=active_members
+        active_members=active_members,
+        gallery_images=gallery_images,
+        banner_image=banner_image
     )
+
+
+@business_bp.route("/manage/<int:business_id>/images/upload", methods=["POST"])
+def upload_business_image(business_id):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute(
+        "SELECT 1 FROM business WHERE business_id = ? AND owner_id = ?",
+        (business_id, session.get("user_id")),
+    )
+    if not cursor.fetchone():
+        conn.close()
+        return apology("Acesso restrito ao proprietário do estabelecimento.", 403)
+
+    role = request.form.get("role")
+    if role not in {"banner", "gallery"}:
+        conn.close()
+        return apology("Tipo de imagem inválido.", 400)
+    if role == "banner":
+        try:
+            save_image_upload(
+                conn, request.files.get("image"), "business", business_id, role, request.form
+            )
+        except ImageUploadError as error:
+            flash(str(error), "danger")
+        else:
+            flash("Banner atualizado com sucesso.", "success")
+    else:
+        images = [
+            image for image in request.files.getlist("images")
+            if image and image.filename
+        ]
+        if not images:
+            flash("Selecione pelo menos uma imagem para a galeria.", "warning")
+        else:
+            saved_count = 0
+            upload_error = None
+            for image in images:
+                try:
+                    save_image_upload(
+                        conn, image, "business", business_id, role, request.form
+                    )
+                    saved_count += 1
+                except ImageUploadError as error:
+                    upload_error = error
+                    break
+            if upload_error:
+                if saved_count:
+                    flash(
+                        f"{saved_count} imagem(ns) adicionada(s). As demais não foram "
+                        f"processadas: {upload_error}",
+                        "warning",
+                    )
+                else:
+                    flash(str(upload_error), "danger")
+            else:
+                flash(
+                    f"{saved_count} imagem(ns) adicionada(s) à galeria.",
+                    "success",
+                )
+    conn.close()
+    return redirect(url_for("business.manage_business", business_id=business_id))
+
+
+@business_bp.route(
+    "/manage/<int:business_id>/images/<int:image_id>/delete", methods=["POST"]
+)
+def remove_business_image(business_id, image_id):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute(
+        "SELECT 1 FROM business WHERE business_id = ? AND owner_id = ?",
+        (business_id, session.get("user_id")),
+    )
+    if not cursor.fetchone():
+        conn.close()
+        return apology("Acesso restrito ao proprietário do estabelecimento.", 403)
+
+    removed = delete_image_asset(conn, image_id, "business", business_id)
+    conn.close()
+    flash(
+        "Imagem removida." if removed else "Imagem não encontrada.",
+        "success" if removed else "warning",
+    )
+    return redirect(url_for("business.manage_business", business_id=business_id))
+
+
+@business_bp.route(
+    "/manage/<int:business_id>/images/<int:image_id>/move/<direction>", methods=["POST"]
+)
+def reorder_business_image(business_id, image_id, direction):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute(
+        "SELECT 1 FROM business WHERE business_id = ? AND owner_id = ?",
+        (business_id, session.get("user_id")),
+    )
+    if not cursor.fetchone():
+        conn.close()
+        return apology("Acesso restrito ao proprietário do estabelecimento.", 403)
+
+    moved = move_gallery_image(conn, image_id, business_id, direction)
+    conn.close()
+    if not moved:
+        flash("A imagem não pode ser movida nessa direção.", "warning")
+    return redirect(url_for("business.manage_business", business_id=business_id))
 
 
 @business_bp.route("/manage/<int:business_id>/delete", methods=["GET", "POST"])
@@ -544,6 +672,8 @@ def delete_business(business_id):
                     (business_id, user_id)
                 )
 
+        if not business_missing:
+            delete_owner_image_assets(conn, "business", business_id)
         conn.close()
         if business_missing:
             return apology("Estabelecimento não encontrado ou acesso não autorizado.", 403)
