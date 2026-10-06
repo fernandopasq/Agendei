@@ -9,6 +9,77 @@
         <p class="text-muted mb-0">Atualize suas informações de conta e contato.</p>
     </div>
 
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-4">
+            <h2 class="h5 fw-bold mb-3">Imagem de perfil</h2>
+            <div class="d-flex flex-column flex-sm-row align-items-center gap-3">
+                {% if user.profile_image_id %}
+                <img src="{{ url_for('serve_image', image_id=user.profile_image_id) }}"
+                    class="profile-avatar-preview" alt="Imagem de perfil de {{ user.name }}">
+                {% else %}
+                <div class="profile-avatar-placeholder profile-avatar-preview" aria-label="Sem imagem de perfil">
+                    <i class="bi bi-person-fill"></i>
+                </div>
+                {% endif %}
+                <div class="flex-grow-1 w-100">
+                    <button class="btn btn-outline-primary" type="button" data-image-editor-toggle
+                        aria-expanded="false" aria-controls="profile-image-editor">
+                        <i class="bi bi-camera me-1"></i>Editar foto de perfil
+                    </button>
+                    <div class="d-none mt-3" id="profile-image-editor" data-image-editor>
+                    <button class="btn btn-outline-secondary btn-sm mb-3" type="button"
+                        data-image-editor-cancel>
+                        <i class="bi bi-x-lg me-1"></i>Cancelar
+                    </button>
+                    <form method="post" action="{{ url_for('upload_profile_image') }}"
+                        enctype="multipart/form-data" data-image-crop-form>
+                        <label for="profile-image" class="btn btn-primary mb-3">
+                            <i class="bi bi-upload me-1"></i>Escolher foto para enviar
+                        </label>
+                        <input class="visually-hidden" type="file" id="profile-image" name="image"
+                            accept="image/jpeg,image/png,image/webp" required data-crop-file>
+                        <div class="image-crop-controls d-none mb-3" data-crop-controls>
+                            <div class="image-crop-preview rounded-circle mx-auto" style="aspect-ratio: 1;"
+                                data-crop-preview>
+                                <img alt="Pré-visualização do corte" data-crop-preview-image>
+                            </div>
+                            <p class="small text-muted mt-2 mb-2 text-center">
+                                Saída: 512 × 512 px. Ajuste a posição e o zoom antes de enviar.
+                            </p>
+                            <div class="row g-2">
+                                <div class="col-sm-4">
+                                    <label class="form-label small mb-1" for="profile-crop-x">Horizontal</label>
+                                    <input class="form-range" id="profile-crop-x" type="range" min="0" max="1"
+                                        step="0.01" value="0.5" name="crop_x" data-crop-x>
+                                </div>
+                                <div class="col-sm-4">
+                                    <label class="form-label small mb-1" for="profile-crop-y">Vertical</label>
+                                    <input class="form-range" id="profile-crop-y" type="range" min="0" max="1"
+                                        step="0.01" value="0.5" name="crop_y" data-crop-y>
+                                </div>
+                                <div class="col-sm-4">
+                                    <label class="form-label small mb-1" for="profile-crop-zoom">Zoom</label>
+                                    <input class="form-range" id="profile-crop-zoom" type="range" min="1" max="3"
+                                        step="0.05" value="1" name="crop_zoom" data-crop-zoom>
+                                </div>
+                            </div>
+                            <button class="btn btn-primary mt-2" type="submit" data-crop-submit>
+                                <i class="bi bi-cloud-arrow-up me-1"></i>Enviar imagem
+                            </button>
+                        </div>
+                    </form>
+                    {% if user.profile_image_id %}
+                    <form method="post" action="{{ url_for('delete_profile_image') }}" class="mt-2"
+                        onsubmit="return confirm('Remover sua imagem de perfil?');">
+                        <button class="btn btn-outline-danger btn-sm" type="submit">Remover imagem de perfil</button>
+                    </form>
+                    {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <form method="post">
         <div class="card border-0 shadow-sm mb-4">
             <div class="card-body p-4">
@@ -94,6 +165,31 @@
 
 {% block scripts %}
 <script>
+    document.querySelectorAll('[data-image-editor-toggle]').forEach(button => {
+        button.addEventListener('click', () => {
+            const editor = document.getElementById(button.getAttribute('aria-controls'));
+            editor.classList.remove('d-none');
+            button.classList.add('d-none');
+            button.setAttribute('aria-expanded', 'true');
+        });
+    });
+
+    document.querySelectorAll('[data-image-editor-cancel]').forEach(button => {
+        button.addEventListener('click', () => {
+            const editor = button.closest('[data-image-editor]');
+            const toggle = document.querySelector(
+                `[aria-controls="${editor.id}"]`
+            );
+            const form = editor.querySelector('[data-image-crop-form]');
+            const fileInput = form.querySelector('[data-crop-file]');
+            fileInput.value = '';
+            fileInput.dispatchEvent(new Event('change'));
+            editor.classList.add('d-none');
+            toggle.classList.remove('d-none');
+            toggle.setAttribute('aria-expanded', 'false');
+        });
+    });
+
     document.querySelectorAll('.profile-edit').forEach(button => {
         button.addEventListener('click', () => {
             const field = button.closest('.profile-field');

@@ -128,11 +128,28 @@
             {% for b in businesses %}
                 <div class="col">
                     <div class="card h-100 border-0 shadow-sm">
+                        <a href="{{ url_for('client.business_detail', business_id=b.business_id) }}"
+                            class="text-decoration-none">
+                            {% if b.banner_image_id %}
+                            <img src="{{ url_for('serve_image', image_id=b.banner_image_id) }}"
+                                class="business-card-banner card-img-top" alt="Banner de {{ b.business_name }}">
+                            {% else %}
+                            <div class="business-card-banner image-banner-placeholder d-flex align-items-center justify-content-center">
+                                <i class="bi bi-building" aria-hidden="true"></i>
+                                <span class="visually-hidden">Sem imagem de banner</span>
+                            </div>
+                            {% endif %}
+                        </a>
                         <div class="card-body p-4 d-flex flex-column">
 
                             <!-- Nome e Badge da Categoria -->
                             <div class="d-flex justify-content-between align-items-start mb-2 gap-2">
-                                <h2 class="h5 fw-bold mb-0">{{ b.business_name }}</h2>
+                                <h2 class="h5 fw-bold mb-0">
+                                    <a class="text-body text-decoration-none"
+                                        href="{{ url_for('client.business_detail', business_id=b.business_id) }}">
+                                        {{ b.business_name }}
+                                    </a>
+                                </h2>
                                 <span class="badge badge-category px-2 py-1"
                                       data-category="{{ b.category | category_slug }}">
                                     {{ b.category }}
@@ -163,8 +180,13 @@
 
                             <!-- Botão de Agendamento -->
                             <div class="pt-3 border-top mt-auto">
+                                <a href="{{ url_for('client.business_detail', business_id=b.business_id) }}"
+                                    class="btn btn-outline-primary w-100 fw-semibold mb-2">
+                                    Ver estabelecimento
+                                </a>
                                 {% if session.user_id %}
-                                    <a href="/appointment/new/{{ b.business_id }}" class="btn btn-primary w-100 fw-semibold">
+                                    <a href="{{ url_for('client.new_appointment', business_id=b.business_id) }}"
+                                        class="btn btn-primary w-100 fw-semibold">
                                         Agendar Atendimento
                                     </a>
                                 {% else %}

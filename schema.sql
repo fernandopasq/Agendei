@@ -75,6 +75,26 @@ CREATE TABLE IF NOT EXISTS provider_services (
     FOREIGN KEY (service_id) REFERENCES services (service_id) ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS image_assets (
+    image_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    owner_type TEXT NOT NULL CHECK (owner_type IN ('user', 'business')),
+    owner_id INTEGER NOT NULL,
+    role TEXT NOT NULL CHECK (role IN ('profile', 'banner', 'gallery')),
+    storage_path TEXT UNIQUE,
+    position INTEGER NOT NULL DEFAULT 0,
+    crop_x REAL NOT NULL DEFAULT 0.5,
+    crop_y REAL NOT NULL DEFAULT 0.5,
+    crop_zoom REAL NOT NULL DEFAULT 1,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_image_assets_single_cover
+    ON image_assets (owner_type, owner_id, role)
+    WHERE role IN ('profile', 'banner');
+
+CREATE INDEX IF NOT EXISTS idx_image_assets_owner_role_position
+    ON image_assets (owner_type, owner_id, role, position, image_id);
+
 CREATE UNIQUE INDEX IF NOT EXISTS idx_users_phone_unique
     ON users (phone);
 

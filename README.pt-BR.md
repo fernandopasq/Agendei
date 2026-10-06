@@ -17,7 +17,7 @@ Existem dois tipos principais de usuário:
 - **Cliente:** Pesquisa estabelecimentos, escolhe serviço e profissional, consulta horários livres, cria agendamentos, visualiza seus agendamentos e cancela atendimentos futuros.
 - **Parceiro (Owner/Provider):** Cadastra estabelecimentos, cria serviços, define durações, gerencia prestadores e acompanha a própria agenda.
 
-A aplicação também oferece uma página de perfil compartilhada entre clientes e parceiros, com edição de dados pessoais, telefone e troca de senha mediante confirmação da senha atual.
+A aplicação também oferece uma página de perfil compartilhada entre clientes e parceiros, com edição de dados pessoais, telefone, troca de senha mediante confirmação da senha atual e envio de imagem de perfil. As páginas públicas dos estabelecimentos exibem seus dados, serviços, equipe e galeria; proprietários podem editar o banner e a galeria horizontal na tela de gestão do estabelecimento.
 
 ---
 
@@ -60,9 +60,22 @@ A aplicação também oferece uma página de perfil compartilhada entre clientes
 - **Flask-Session:** Armazenamento das sessões em arquivos locais.
 - **Werkzeug:** Hash e verificação de senhas por meio de `generate_password_hash` e `check_password_hash`.
 - **SQLite:** Banco de dados relacional local.
+- **Pillow:** Validação, recorte, redimensionamento e conversão das imagens enviadas para WebP.
 
 *As dependências Python usadas diretamente pela aplicação estão em `requirements.txt`. O SQLite faz parte da biblioteca padrão do Python, enquanto Werkzeug e Jinja2 são instalados automaticamente como dependências do Flask.*
 </details>
+
+### Imagens de perfil e estabelecimentos
+
+Os arquivos são armazenados localmente em `instance/uploads/`, separados por usuário/estabelecimento e tipo de imagem. A tabela `image_assets` associa um identificador numérico único a cada imagem e registra seu proprietário, papel, recorte e posição na galeria.
+
+O upload aceita JPEG, PNG e WebP de até 8 MB por arquivo. Na edição do perfil, primeiro é exibida a miniatura e o botão **Editar foto de perfil**; os controles de corte aparecem somente após escolher a imagem. Na gestão do estabelecimento, o banner pode ser editado em uma janela sobreposta e a galeria abre uma janela que aceita vários arquivos simultaneamente, sem controles de corte. As galerias usam o Carousel e o Modal do Bootstrap para navegação horizontal e ampliação. O servidor aplica o corte configurado com Pillow e gera imagens WebP nestas dimensões:
+
+- **Perfil:** 512 × 512 px.
+- **Banner** (cards e cabeçalho público): 1200 × 600 px (proporção 2:1).
+- **Galeria:** 1200 × 900 px (proporção 4:3).
+
+Sem imagem de perfil ou banner, a interface usa um placeholder. A galeria pública fica oculta quando o estabelecimento ainda não possui fotos.
 
 <details>
   <summary><b>Frontend</b> (Clique para expandir)</summary>

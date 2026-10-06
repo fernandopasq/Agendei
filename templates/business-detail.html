@@ -1,0 +1,198 @@
+{% extends "layout.html" %}
+
+{% block title %}{{ business.business_name }}{% endblock %}
+
+{% block body %}
+<div class="container py-4">
+    <a href="{{ url_for('client.index') }}" class="btn btn-outline-secondary btn-sm mb-3">
+        <i class="bi bi-arrow-left me-1"></i>Voltar para estabelecimentos
+    </a>
+
+    {% if business.banner_image_id %}
+    <img src="{{ url_for('serve_image', image_id=business.banner_image_id) }}"
+        class="business-page-banner mb-4" alt="Banner de {{ business.business_name }}">
+    {% else %}
+    <div class="business-page-banner image-banner-placeholder d-flex align-items-center justify-content-center mb-4">
+        <i class="bi bi-building" aria-hidden="true"></i>
+        <span class="visually-hidden">Sem imagem de banner</span>
+    </div>
+    {% endif %}
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <section class="card border-0 shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+                        <div>
+                            <span class="badge bg-primary-subtle text-primary mb-2">{{ business.category }}</span>
+                            <h1 class="h2 fw-bold mb-1">{{ business.business_name }}</h1>
+                        </div>
+                        {% if session.get('user_type') == 2 %}
+                        <a href="{{ url_for('client.new_appointment', business_id=business.business_id) }}"
+                            class="btn btn-primary">
+                            <i class="bi bi-calendar-check me-1"></i>Agendar atendimento
+                        </a>
+                        {% else %}
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                            data-bs-target="#authRequiredModal">
+                            <i class="bi bi-calendar-check me-1"></i>Agendar atendimento
+                        </button>
+                        {% endif %}
+                    </div>
+                    <p class="text-muted mb-0">{{ business.description or 'Este estabelecimento ainda não adicionou uma descrição.' }}</p>
+                </div>
+            </section>
+
+            {% if gallery %}
+            <section class="mb-4">
+                <h2 class="h5 fw-bold mb-3">Galeria</h2>
+                    <div id="businessPublicGallery" class="carousel slide business-gallery-carousel"
+                        data-bs-ride="false" aria-label="Galeria de {{ business.business_name }}">
+                        <div class="carousel-inner rounded">
+                        {% for image in gallery %}
+                        <div class="carousel-item {% if loop.first %}active{% endif %}">
+                            <button class="gallery-zoom-trigger" type="button"
+                                data-bs-toggle="modal" data-bs-target="#publicBusinessGalleryPreview"
+                                data-gallery-src="{{ url_for('serve_image', image_id=image.image_id) }}"
+                                data-gallery-alt="Foto {{ loop.index }} de {{ business.business_name }}">
+                                <img src="{{ url_for('serve_image', image_id=image.image_id) }}"
+                                    class="business-gallery-slide" alt="Foto {{ loop.index }} de {{ business.business_name }}"
+                                    loading="lazy">
+                                <span class="visually-hidden">Ampliar foto {{ loop.index }}</span>
+                            </button>
+                        </div>
+                        {% endfor %}
+                        </div>
+                        {% if gallery|length > 1 %}
+                        <button class="carousel-control-prev" type="button" data-bs-target="#businessPublicGallery"
+                            data-bs-slide="prev" aria-label="Foto anterior">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#businessPublicGallery"
+                            data-bs-slide="next" aria-label="Próxima foto">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        </button>
+                        {% endif %}
+                    </div>
+            </section>
+            {% endif %}
+
+            <section class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <h2 class="h5 fw-bold mb-3">Serviços oferecidos</h2>
+                    {% if services %}
+                    <div class="list-group list-group-flush">
+                        {% for service in services %}
+                        <div class="list-group-item px-0 py-3">
+                            <div class="d-flex justify-content-between gap-3">
+                                <div>
+                                    <h3 class="h6 fw-bold mb-1">{{ service.name }}</h3>
+                                    <p class="small text-muted mb-1">{{ service.description or 'Descrição não informada.' }}</p>
+                                    <small class="text-muted">{{ service.duration_minutes or 30 }} min</small>
+                                    {% if service.provider_names %}
+                                    <div class="small text-muted mt-1">
+                                        <i class="bi bi-person me-1"></i>{{ service.provider_names }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <span class="fw-bold text-primary text-nowrap">{{ service.price|brl }}</span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted mb-0">Nenhum serviço cadastrado no momento.</p>
+                    {% endif %}
+                </div>
+            </section>
+        </div>
+
+        <aside class="col-lg-4">
+            <section class="card border-0 shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <h2 class="h5 fw-bold mb-3">Localização e contato</h2>
+                    <p class="mb-3">
+                        <i class="bi bi-geo-alt text-primary me-2"></i>
+                        {{ business.street }}, {{ business.number }}
+                        {% if business.complement %} - {{ business.complement }}{% endif %}<br>
+                        <span class="text-muted ms-4">{{ business.neighborhood }}, {{ business.city }}/{{ business.state }}</span>
+                    </p>
+                    <p class="mb-0">
+                        <i class="bi bi-telephone text-primary me-2"></i>
+                        <a href="tel:{{ business.phone }}" class="text-body">{{ business.phone|phone }}</a>
+                    </p>
+                </div>
+            </section>
+
+            <section class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <h2 class="h5 fw-bold mb-3">Equipe</h2>
+                    {% for provider in providers %}
+                    <div class="d-flex align-items-center gap-3 {% if not loop.last %}mb-3{% endif %}">
+                        {% if provider.profile_image_id %}
+                        <img class="staff-avatar" src="{{ url_for('serve_image', image_id=provider.profile_image_id) }}"
+                            alt="Foto de {{ provider.name }}">
+                        {% else %}
+                        <div class="staff-avatar staff-avatar-placeholder" aria-hidden="true">
+                            <i class="bi bi-person-fill"></i>
+                        </div>
+                        {% endif %}
+                        <div>
+                            <div class="fw-semibold">{{ provider.name }} {{ provider.surename or '' }}</div>
+                            <small class="text-muted">{{ provider.role }}</small>
+                        </div>
+                    </div>
+                    {% else %}
+                    <p class="text-muted mb-0">A equipe ainda não foi informada.</p>
+                    {% endfor %}
+                </div>
+            </section>
+        </aside>
+    </div>
+</div>
+{% if gallery %}
+<div class="modal fade" id="publicBusinessGalleryPreview" tabindex="-1"
+    aria-label="Imagem ampliada" aria-hidden="true" data-gallery-modal>
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content bg-dark">
+            <div class="modal-header border-0">
+                <button type="button" class="btn-close btn-close-white ms-auto"
+                    data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body pt-0 text-center">
+                <img class="gallery-lightbox-image" alt="" data-gallery-modal-image>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% if session.get('user_type') != 2 %}
+<div class="modal fade" id="authRequiredModal" tabindex="-1" aria-labelledby="authRequiredModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header border-0 pb-0">
+                <h2 class="modal-title h5 fw-bold" id="authRequiredModalLabel">Conta de cliente necessária</h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body py-4">
+                {% if session.get('user_id') %}
+                <p class="mb-0 text-muted">
+                    Para agendar, saia da conta de parceiro e entre com uma conta de cliente.
+                </p>
+                {% else %}
+                <p class="mb-0 text-muted">Entre ou crie uma conta de cliente para agendar um serviço.</p>
+                {% endif %}
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                {% if session.get('user_id') %}
+                <a href="{{ url_for('client.logout') }}" class="btn btn-outline-primary">Sair da conta</a>
+                {% else %}
+                <a href="{{ url_for('client.login_user') }}" class="btn btn-outline-primary">Entrar</a>
+                <a href="{{ url_for('client.register_user') }}" class="btn btn-primary">Criar conta</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

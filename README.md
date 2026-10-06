@@ -17,7 +17,7 @@ There are two main user roles:
 - **Client:** Searches for local businesses, selects services and professionals, checks available time slots, books appointments, tracks upcoming bookings, and cancels future appointments.
 - **Partner (Owner/Provider):** Registers business locations, creates service offerings with specific durations, manages staff/providers, and tracks their own service schedule.
 
-The application also features a shared Profile page where both clients and partners can edit personal information, phone numbers, and update passwords (requiring current password verification).
+The application also features a shared Profile page where both clients and partners can edit personal information, phone numbers, update passwords (requiring current password verification), and upload a profile image. Public business pages display their details, services, team, and gallery; owners can edit the banner and horizontal gallery from the business management page.
 
 ---
 
@@ -60,9 +60,22 @@ The application also features a shared Profile page where both clients and partn
 - **Flask-Session:** Handles server-side session storage using local files.
 - **Werkzeug:** Secure password hashing and verification using `generate_password_hash` and `check_password_hash`.
 - **SQLite:** Relational database for local data storage.
+- **Pillow:** Validates, crops, resizes, and converts uploaded images to WebP.
 
 *Python dependencies are listed in `requirements.txt`. SQLite is part of the Python standard library, while Werkzeug and Jinja2 are installed automatically alongside Flask.*
 </details>
+
+### Profile and business images
+
+Files are stored locally under `instance/uploads/`, separated by user/business and image role. The `image_assets` table assigns every image a unique numeric ID and stores its owner, role, crop settings, and gallery position.
+
+Uploads accept JPEG, PNG, or WebP files up to 8 MB each. The profile page first shows a thumbnail and an **Edit profile photo** button; crop controls appear only after choosing a file. On the business management page, the banner editor opens in a modal and the gallery editor accepts multiple files at once without crop controls. Bootstrap Carousel and Modal provide horizontal gallery navigation and image enlargement. Pillow applies the configured crop and generates WebP images at these sizes:
+
+- **Profile:** 512 × 512 px.
+- **Banner** (cards and public page): 1200 × 600 px (2:1).
+- **Gallery:** 1200 × 900 px (4:3).
+
+Profile and banner placeholders are shown when no image exists. The public gallery is hidden until the establishment has at least one photo.
 
 <details>
   <summary><b>Frontend Technologies</b> (Click to expand)</summary>
