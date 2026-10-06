@@ -67,12 +67,42 @@ def index():
         state: dict(cities)
         for state, cities in locations.items()
     }
+    neighborhoods_by_city = defaultdict(set)
+    for state_cities in locations.values():
+        for city, city_neighborhoods in state_cities.items():
+            neighborhoods_by_city[city].update(city_neighborhoods)
+    neighborhoods_by_city = {
+        city: sorted(city_neighborhoods)
+        for city, city_neighborhoods in neighborhoods_by_city.items()
+    }
 
     if selected_state not in locations:
         selected_state = ""
-    if selected_state and selected_city not in locations[selected_state]:
+    available_cities = (
+        set(locations[selected_state])
+        if selected_state
+        else set(neighborhoods_by_city)
+    )
+    if selected_city not in available_cities:
         selected_city = ""
-    if selected_state and selected_city and selected_neighborhood not in locations[selected_state][selected_city]:
+
+    if selected_state and selected_city:
+        available_neighborhoods = set(locations[selected_state][selected_city])
+    elif selected_city:
+        available_neighborhoods = set(neighborhoods_by_city[selected_city])
+    elif selected_state:
+        available_neighborhoods = {
+            neighborhood
+            for city_neighborhoods in locations[selected_state].values()
+            for neighborhood in city_neighborhoods
+        }
+    else:
+        available_neighborhoods = {
+            neighborhood
+            for city_neighborhoods in neighborhoods_by_city.values()
+            for neighborhood in city_neighborhoods
+        }
+    if selected_neighborhood not in available_neighborhoods:
         selected_neighborhood = ""
 
     # Monta a SQL dinâmica
@@ -172,6 +202,7 @@ def index():
         selected_category=selected_category,
         user_name=user_name,
         locations=locations,
+        neighborhoods_by_city=neighborhoods_by_city,
         current_page=current_page,
         total_pages=total_pages,
         total_businesses=total_businesses,

@@ -93,7 +93,16 @@
                     <label class="form-label small fw-semibold text-muted">Bairro</label>
                     <select name="neighborhood" id="neighborhood-filter" class="form-select">
                         <option value="">Todos</option>
-                        {% for n in (locations[selected_state][selected_city] if selected_state and selected_city else neighborhoods) %}
+                        {% if selected_state and selected_city %}
+                            {% set neighborhood_options = locations[selected_state][selected_city] %}
+                        {% elif selected_city %}
+                            {% set neighborhood_options = neighborhoods_by_city[selected_city] %}
+                        {% elif selected_state %}
+                            {% set neighborhood_options = locations[selected_state].values()|sum(start=[])|unique|sort %}
+                        {% else %}
+                            {% set neighborhood_options = neighborhoods %}
+                        {% endif %}
+                        {% for n in neighborhood_options %}
                             <option value="{{ n }}" {% if n == selected_neighborhood %}selected{% endif %}>{{ n }}</option>
                         {% endfor %}
                     </select>
@@ -251,26 +260,53 @@
         });
     }
 
-    function updateLocationFilters() {
-        const state = stateFilter.value;
-        const city = cityFilter.value;
-        const cities = state && locationHierarchy[state]
-            ? Object.keys(locationHierarchy[state]).sort()
-            : Object.values(locationHierarchy).flatMap(stateCities => Object.keys(stateCities)).filter((value, index, all) => all.indexOf(value) === index).sort();
-        const neighborhoods = state && city && locationHierarchy[state]?.[city]
-            ? locationHierarchy[state][city].slice().sort()
-            : Object.values(locationHierarchy).flatMap(stateCities => Object.values(stateCities)).flat().filter((value, index, all) => all.indexOf(value) === index).sort();
-
-        addOptions(cityFilter, cities, 'Todas');
-        if (cities.includes(city)) cityFilter.value = city;
-        addOptions(neighborhoodFilter, state && city ? neighborhoods : neighborhoods, 'Todos');
+    function getCityOptions(state) {
+        const stateCities = state
+            ? Object.keys(locationHierarchy[state] || {})
+            : Object.values(locationHierarchy).flatMap(cities => Object.keys(cities));
+        return [...new Set(stateCities)].sort();
     }
 
-    stateFilter.addEventListener('change', () => {
-        addOptions(cityFilter, stateFilter.value && locationHierarchy[stateFilter.value] ? Object.keys(locationHierarchy[stateFilter.value]).sort() : [], 'Todas');
-        addOptions(neighborhoodFilter, [], 'Todos');
-    });
-    cityFilter.addEventListener('change', updateLocationFilters);
+    function getNeighborhoodOptions(state, city) {
+        let neighborhoodLists;
+        if (state && city) {
+            neighborhoodLists = [locationHierarchy[state]?.[city] || []];
+        } else if (city) {
+            neighborhoodLists = Object.values(locationHierarchy)
+                .map(cities => cities[city] || []);
+        } else if (state) {
+            neighborhoodLists = Object.values(locationHierarchy[state] || {});
+        } else {
+            neighborhoodLists = Object.values(locationHierarchy)
+                .flatMap(cities => Object.values(cities));
+        }
+        return [...new Set(neighborhoodLists.flat())].sort();
+    }
+
+    function updateCityOptions() {
+        const state = stateFilter.value;
+        const previousCity = cityFilter.value;
+        const cities = getCityOptions(state);
+        addOptions(cityFilter, cities, 'Todas');
+        if (cities.includes(previousCity)) cityFilter.value = previousCity;
+        updateNeighborhoodOptions();
+    }
+
+    function updateNeighborhoodOptions() {
+        const neighborhoods = getNeighborhoodOptions(
+            stateFilter.value,
+            cityFilter.value
+        );
+        const previousNeighborhood = neighborhoodFilter.value;
+        addOptions(neighborhoodFilter, neighborhoods, 'Todos');
+        if (neighborhoods.includes(previousNeighborhood)) {
+            neighborhoodFilter.value = previousNeighborhood;
+        }
+    }
+
+    stateFilter.addEventListener('change', updateCityOptions);
+    cityFilter.addEventListener('change', updateNeighborhoodOptions);
+    updateCityOptions();
 </script>
 {% endblock %}
 
