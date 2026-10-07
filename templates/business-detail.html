@@ -13,7 +13,9 @@
         class="business-page-banner mb-4" alt="Banner de {{ business.business_name }}">
     {% else %}
     <div class="business-page-banner image-banner-placeholder d-flex align-items-center justify-content-center mb-4">
-        <i class="bi bi-building" aria-hidden="true"></i>
+        <div class="image-banner-art" aria-hidden="true">
+            {% include "svg/BusinessBannerPlaceholder.svg" %}
+        </div>
         <span class="visually-hidden">Sem imagem de banner</span>
     </div>
     {% endif %}

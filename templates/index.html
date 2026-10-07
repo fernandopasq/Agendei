@@ -144,7 +144,9 @@
                                 class="business-card-banner card-img-top" alt="Banner de {{ b.business_name }}">
                             {% else %}
                             <div class="business-card-banner image-banner-placeholder d-flex align-items-center justify-content-center">
-                                <i class="bi bi-building" aria-hidden="true"></i>
+                                <div class="image-banner-art" aria-hidden="true">
+                                    {% include "svg/BusinessBannerPlaceholder.svg" %}
+                                </div>
                                 <span class="visually-hidden">Sem imagem de banner</span>
                             </div>
                             {% endif %}
