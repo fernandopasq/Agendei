@@ -12,7 +12,8 @@
     <img src="{{ url_for('serve_image', image_id=business.banner_image_id) }}"
         class="business-page-banner mb-4" alt="Banner de {{ business.business_name }}">
     {% else %}
-    <div class="business-page-banner image-banner-placeholder d-flex align-items-center justify-content-center mb-4">
+    <div class="business-page-banner image-banner-placeholder d-flex align-items-center justify-content-center mb-4"
+        data-category="{{ business.category | category_slug }}">
         <div class="image-banner-art" aria-hidden="true">
             {% include "svg/BusinessBannerPlaceholder.svg" %}
         </div>
@@ -26,7 +27,8 @@
                 <div class="card-body p-4">
                     <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
                         <div>
-                            <span class="badge bg-primary-subtle text-primary mb-2">{{ business.category }}</span>
+                            <span class="badge badge-category mb-2"
+                                data-category="{{ business.category | category_slug }}">{{ business.category }}</span>
                             <h1 class="h2 fw-bold mb-1">{{ business.business_name }}</h1>
                         </div>
                         {% if session.get('user_type') == 2 %}

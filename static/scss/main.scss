@@ -261,15 +261,10 @@ body {
 // 6. COMPONENTE: BADGE DE CATEGORIA DINÂMICA
 // ==============================================================================
 
-// Estilo base da etiqueta
-.badge-category {
-  // Cor padrão (azul-petróleo)
+// Cor compartilhada entre a etiqueta e o placeholder do banner
+.badge-category,
+.image-banner-placeholder {
   --cat-color: #{$ctp-teal};
-
-  background-color: color-mix(in srgb, var(--cat-color) 15%, transparent);
-  color: var(--cat-color);
-  border: 1px solid color-mix(in srgb, var(--cat-color) 35%, transparent);
-  font-weight: 600;
 
   // Mapeamento automático por data-category usando variáveis locais
   &[data-category="beleza-e-estetica"],
@@ -312,6 +307,14 @@ body {
   &[data-category="servicos-domesticos"] {
     --cat-color: #{$ctp-sky};
   }
+}
+
+// Estilo base da etiqueta
+.badge-category {
+  background-color: color-mix(in srgb, var(--cat-color) 15%, transparent);
+  color: var(--cat-color);
+  border: 1px solid color-mix(in srgb, var(--cat-color) 35%, transparent);
+  font-weight: 600;
 }
 
 .pagination {

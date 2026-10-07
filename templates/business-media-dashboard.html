@@ -4,7 +4,8 @@
         <img src="{{ url_for('serve_image', image_id=banner_image.image_id) }}"
             class="business-page-banner" alt="Banner de {{ business.business_name }}">
         {% else %}
-        <div class="business-page-banner image-banner-placeholder d-flex align-items-center justify-content-center">
+        <div class="business-page-banner image-banner-placeholder d-flex align-items-center justify-content-center"
+            data-category="{{ business.category | category_slug }}">
             <div class="image-banner-art" aria-hidden="true">
                 {% include "svg/BusinessBannerPlaceholder.svg" %}
             </div>
